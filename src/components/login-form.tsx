@@ -15,6 +15,7 @@ import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { GoogleSignInButton } from "./cutome/google-signin-button";
 
 export function LoginForm({
   className,
@@ -57,6 +58,20 @@ export function LoginForm({
           </CardDescription>
         </CardHeader>
         <CardContent>
+          {/* 1. The Google Button */}
+          <GoogleSignInButton />
+
+          {/* 2. A visual divider */}
+          <div className="relative my-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-300"></div>
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-2 bg-white text-gray-500">
+                Or continue with
+              </span>
+            </div>
+          </div>
           <form onSubmit={handleLogin}>
             <div className="flex flex-col gap-6">
               <div className="grid gap-2">

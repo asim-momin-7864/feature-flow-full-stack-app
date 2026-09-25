@@ -1,32 +1,56 @@
-import { EnvVarWarning } from "@/components/env-var-warning";
-import { AuthButton } from "@/components/auth-button";
-import { ThemeSwitcher } from "@/components/theme-switcher";
-import { hasEnvVars } from "@/lib/utils";
-import Link from "next/link";
+// it is server component
+import { FeedbackCard } from "@/components/feedback-card";
+import { createClient } from "@/lib/supabase/server";
+import { FeedbackCardType } from "@/components/feedback-card";
 import { Suspense } from "react";
+
+async function FeedbackList() {
+  const supabase = await createClient();
+  const { data: feedbacksArray } = await supabase
+    .from("feedback")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (!feedbacksArray || feedbacksArray.length === 0) {
+    return (
+      <p className="text-muted-foreground text-center py-10">
+        No feedback yet. Be the first to suggest something!
+      </p>
+    );
+  }
+
+  return (
+    <>
+      {feedbacksArray.map((feedback) => (
+        <FeedbackCard key={feedback.id} feedbackData={feedback} />
+      ))}
+    </>
+  );
+}
 
 export default function Home() {
   return (
     <main className="min-h-screen flex flex-col items-center">
       <div className="flex-1 w-full flex flex-col items-center">
-        <nav className="w-full flex justify-center border-b border-b-foreground/10 h-16">
-          <div className="w-full max-w-5xl flex justify-between items-center p-3 px-5 text-sm">
-            <div className="flex gap-5 items-center font-semibold">
-              <Link href={"/"}>Next.js Supabase Starter</Link>
-            </div>
-            <div className="flex gap-4 items-center">
-              <ThemeSwitcher />
-              {!hasEnvVars ? (
-                <EnvVarWarning />
-              ) : (
-                <Suspense>
-                  <AuthButton />
-                </Suspense>
-              )}
-            </div>
+        <div className="flex-1 flex flex-col gap-10 w-full max-w-3xl p-5">
+          <div className="mt-10">
+            <h1 className="text-3xl font-bold">Feedback Board</h1>
+            <p className="text-muted-foreground mt-2">
+              Vote on features or submit your own ideas!
+            </p>
           </div>
-        </nav>
-        <div className="flex-1 flex flex-col gap-20 max-w-5xl p-5">
+
+          <div className="flex flex-col gap-4">
+            <Suspense
+              fallback={
+                <p className="text-muted-foreground animate-pulse">
+                  Loading feedback...
+                </p>
+              }
+            >
+              <FeedbackList />
+            </Suspense>
+          </div>
         </div>
       </div>
     </main>

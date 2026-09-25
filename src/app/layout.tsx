@@ -3,6 +3,8 @@ import { Geist, Roboto_Slab, Public_Sans } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import "./globals.css";
 import { cn } from "@/lib/utils";
+import { Navbar } from "@/components/navbar";
+import { Footer } from "@/components/footer";
 
 const publicSansHeading = Public_Sans({subsets:['latin'],variable:'--font-heading'});
 
@@ -31,14 +33,18 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning className={cn("font-serif", robotoSlab.variable, publicSansHeading.variable)}>
-      <body className={`${geistSans.className} antialiased`}>
+      <body className={`${geistSans.className} antialiased`} suppressHydrationWarning>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
           enableSystem
           disableTransitionOnChange
         >
-          {children}
+          <Navbar />
+          <div className="flex flex-col min-h-[calc(100vh-64px)]">
+            {children}
+          </div>
+          <Footer />
         </ThemeProvider>
       </body>
     </html>
