@@ -4,7 +4,11 @@ import { createClient } from "@/lib/supabase/server";
 import { Suspense } from "react";
 import { FeedbackType } from "@/lib/validations";
 import { Card, CardContent } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
+import DeleteButton from "@/components/custome/delete-button";
+import CommentForm from "@/components/custome/comment-form";
+
 // helper component
 const FeedbackDetailsHelper = async ({
   idPromise,
@@ -36,7 +40,10 @@ const FeedbackDetailsHelper = async ({
 
   // type casting
   const feedbackData = data as unknown as FeedbackType;
-  console.log(feedbackData);
+
+  // get current user to check ownership
+  const { data: authData } = await supabase.auth.getUser();
+  const isOwner = authData.user?.id === feedbackData.user_id;
 
   // render
   return (
@@ -58,9 +65,16 @@ const FeedbackDetailsHelper = async ({
           </Badge>
         </div>
 
-        <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight text-foreground leading-tight">
-          {feedbackData.title}
-        </h1>
+        <div className="flex items-start justify-between gap-4">
+          <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight text-foreground leading-tight">
+            {feedbackData.title}
+          </h1>
+          {isOwner && (
+            <div className="pt-1 md:pt-2 shrink-0">
+              <DeleteButton id={id} />
+            </div>
+          )}
+        </div>
 
         <div className="flex items-center gap-3 text-base text-muted-foreground pt-2">
           <span className="font-medium text-foreground">
@@ -79,15 +93,30 @@ const FeedbackDetailsHelper = async ({
 
       {/* Description Content */}
       <Card className="w-full border-muted/60 shadow-sm bg-card/50">
-        <CardContent className="p-6 md:p-10">
+        <CardContent className="p-6 md:p-10 pb-4 md:pb-6">
           <p className="whitespace-pre-wrap leading-loose text-lg text-foreground/90">
             {feedbackData.description}
           </p>
         </CardContent>
       </Card>
 
-      {/* Spacer for future components (upvotes, comments) */}
-      <div className="h-10"></div>
+      <Separator className="my-10" />
+
+      {/* Comments Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 w-full">
+        {/* Left Side: Comments List (Empty for now) */}
+        <div className="lg:col-span-2 space-y-6">
+          <h2 className="text-2xl font-bold tracking-tight">Comments</h2>
+          <div className="text-muted-foreground italic p-8 border border-dashed rounded-xl bg-muted/20 text-center">
+            Comment cards will be rendered here...
+          </div>
+        </div>
+
+        {/* Right Side: Add Comment Form UI */}
+        <div className="lg:col-span-1">
+          <CommentForm feedback_id={feedbackData.id} />
+        </div>
+      </div>
     </div>
   );
 };

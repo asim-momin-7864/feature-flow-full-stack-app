@@ -6,11 +6,11 @@ import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 
 // input schema type
-export const CommentSchema = z.object({
+const CommentSchema = z.object({
   content: z.string().min(5, "Comment is too short"),
 });
 
-export type CommentsType = z.infer<typeof CommentSchema>;
+type CommentsType = z.infer<typeof CommentSchema>;
 
 // action state
 type ActionState = {
@@ -73,7 +73,7 @@ export const createCommentAction = async (
   }
 
   // revalidate
-  revalidatePath(`/feedbacks/${feedbackId}`);
+  revalidatePath(`/feedback/${feedbackId}`);
 
   return {
     success: true,
