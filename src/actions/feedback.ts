@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { CreateFeedbackSchema } from "@/lib/validations";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 
 // Action State - server action return actions state (or custome also)
 export type ActionState = {
@@ -79,7 +80,7 @@ export async function createFeedbackAction(
 export async function deleteFeedbackAction(
   prevState: ActionState,
   formData: FormData,
-): Promise<ActionState> {
+) {
   // check user is authenticated
   const supabase = await createClient();
   const {
@@ -118,8 +119,51 @@ export async function deleteFeedbackAction(
 
   // revalidated
   revalidatePath("/feedbacks");
-  return {
-    success: true,
-    message: "Feedback deleted successfully!",
-  };
+  redirect("/");
 }
+
+// vote toggler
+export const toggleVoteAction = async (formData: FormData): Promise<void> => {
+  // check auth
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+
+  // check
+  if (authError || !user) {
+    throw new Error("User not authenticated");
+  }
+
+  // feedback id
+  const feedbackId = String(formData.get("id"));
+
+  // isVoted check
+  const isVoted: boolean = Boolean(formData.get("isVoted"));
+
+  if (isVoted) {
+    // down vote
+    const { error } = await supabase
+      .from("votes")
+      .delete()
+      .eq("user_id", user.id)
+      .eq("feedback_id", feedbackId);
+
+    // check error
+    if (error) {
+      console.error("error in down voting");
+    }
+  } else {
+    // up vote
+    const { error } = await supabase.from("votes").insert({
+      feedback_id: feedbackId,
+      user_id: user.id,
+    });
+
+    if (error) {
+      console.error("error in up voting");
+    }
+  }
+};

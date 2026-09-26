@@ -30,11 +30,31 @@ async function FeedbackList() {
 
   return (
     <>
-      {feedbacksArray.map((feedback) => (
-        <Link href={`/feedback/${feedback.id}`} key={feedback.id}>
-          <FeedbackCard feedbackData={feedback} />
-        </Link>
-      ))}
+      {feedbacksArray.map((feedback) => {
+        // Check if the feedback is deleted
+        if (feedback.is_deleted || feedback.deleted_at) {
+          return (
+            <div 
+              key={feedback.id} 
+              className="w-full p-6 border border-dashed rounded-xl bg-muted/20 text-muted-foreground text-center text-sm italic flex flex-col items-center gap-1"
+            >
+              <span>This feedback was deleted by {feedback.deleted_by_admin ? "an admin" : (feedback.profile?.full_name || "the author")}.</span>
+              {feedback.deleted_at && (
+                <span className="text-xs opacity-70">
+                  on {new Date(feedback.deleted_at).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}
+                </span>
+              )}
+            </div>
+          );
+        }
+
+        // Normal render
+        return (
+          <Link href={`/feedback/${feedback.id}`} key={feedback.id}>
+            <FeedbackCard feedbackData={feedback} />
+          </Link>
+        );
+      })}
     </>
   );
 }
