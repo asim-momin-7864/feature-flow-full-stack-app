@@ -10,6 +10,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { MessageSquare } from "lucide-react";
 import type { FeedbackType } from "@/lib/validations";
+import { UserAvatar } from "@/components/custome/user-avatar";
 
 // feedback card props
 export type FeedbackCardProps = {
@@ -66,16 +67,11 @@ export function FeedbackCard({ feedbackData }: FeedbackCardProps) {
       </CardHeader>
       <CardContent className="pb-3">
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <div className="h-6 w-6 shrink-0 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xs uppercase overflow-hidden border">
-            {feedbackData.profile?.avatar_url ? (
-              <img
-                src={feedbackData.profile.avatar_url}
-                alt={feedbackData.profile.full_name || "Avatar"}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              feedbackData.profile?.full_name?.charAt(0) || "U"
-            )}
+          <div className="h-6 w-6 shrink-0 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xs uppercase overflow-hidden border relative">
+            <UserAvatar 
+              url={feedbackData.profile?.avatar_url} 
+              fallbackText={feedbackData.profile?.full_name?.charAt(0) || "U"} 
+            />
           </div>
           <span className="font-medium text-foreground/80">
             {feedbackData.profile?.full_name || "Anonymous"}

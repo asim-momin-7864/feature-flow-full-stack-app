@@ -4,6 +4,7 @@ import type { CommentType } from "@/lib/validations";
 import { Suspense } from "react";
 
 import DeleteCommentButton from "@/components/custome/delete-comment-button";
+import { UserAvatar } from "@/components/custome/user-avatar";
 
 // helper func
 const CommentListFetch = async ({ feedbackId }: { feedbackId: string }) => {
@@ -37,12 +38,11 @@ const CommentListFetch = async ({ feedbackId }: { feedbackId: string }) => {
         return (
           <div key={comment.id} className="flex gap-4 p-5 rounded-xl bg-card border shadow-sm">
             {/* Avatar */}
-            <div className="h-10 w-10 shrink-0 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm uppercase overflow-hidden border">
-              {comment.profile?.avatar_url ? (
-                <img src={comment.profile.avatar_url} alt={comment.profile.full_name} className="w-full h-full object-cover" />
-              ) : (
-                comment.profile?.full_name?.charAt(0) || "U"
-              )}
+            <div className="h-10 w-10 shrink-0 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm uppercase overflow-hidden border relative">
+              <UserAvatar 
+                url={comment.profile?.avatar_url} 
+                fallbackText={comment.profile?.full_name?.charAt(0) || "U"} 
+              />
             </div>
             
             {/* Content */}
