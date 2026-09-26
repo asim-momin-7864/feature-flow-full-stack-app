@@ -8,6 +8,7 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import DeleteButton from "@/components/custome/delete-button";
 import CommentForm from "@/components/custome/comment-form";
+import CommentList from "@/components/custome/comment-list";
 
 // helper component
 const FeedbackDetailsHelper = async ({
@@ -104,12 +105,9 @@ const FeedbackDetailsHelper = async ({
 
       {/* Comments Section */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 w-full">
-        {/* Left Side: Comments List (Empty for now) */}
         <div className="lg:col-span-2 space-y-6">
           <h2 className="text-2xl font-bold tracking-tight">Comments</h2>
-          <div className="text-muted-foreground italic p-8 border border-dashed rounded-xl bg-muted/20 text-center">
-            Comment cards will be rendered here...
-          </div>
+          <CommentList feedbackId={feedbackData.id} />
         </div>
 
         {/* Right Side: Add Comment Form UI */}
