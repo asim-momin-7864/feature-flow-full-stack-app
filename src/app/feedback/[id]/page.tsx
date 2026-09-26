@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import DeleteButton from "@/components/custome/delete-button";
 import CommentForm from "@/components/custome/comment-form";
 import CommentList from "@/components/custome/comment-list";
+import { getCategoryStyles } from "@/components/custome/feedback-card";
 
 // helper component
 const FeedbackDetailsHelper = async ({
@@ -46,6 +47,8 @@ const FeedbackDetailsHelper = async ({
   const { data: authData } = await supabase.auth.getUser();
   const isOwner = authData.user?.id === feedbackData.user_id;
 
+  const styles = getCategoryStyles(feedbackData.category);
+
   // render
   return (
     <div className="w-full space-y-8 animate-in fade-in duration-500">
@@ -53,8 +56,8 @@ const FeedbackDetailsHelper = async ({
       <div className="space-y-6">
         <div className="flex items-center gap-3">
           <Badge
-            variant="secondary"
-            className="px-3 py-1 text-sm font-semibold rounded-md"
+            variant="outline"
+            className={`px-3 py-1 text-sm font-semibold rounded-md ${styles.badge}`}
           >
             {feedbackData.category}
           </Badge>

@@ -16,9 +16,33 @@ export type FeedbackCardProps = {
   feedbackData: FeedbackType;
 };
 
+// color helper
+export const getCategoryStyles = (category: string) => {
+  switch (category?.toUpperCase()) {
+    case "BUG":
+      return {
+        badge: "bg-red-100 text-red-800 dark:bg-red-500/20 dark:text-red-300 border-transparent hover:bg-red-100 dark:hover:bg-red-500/20",
+        cardBg: "bg-red-50/50 dark:bg-red-950/10 hover:bg-red-100/50 dark:hover:bg-red-950/20 border-red-100/50 dark:border-red-900/30",
+      };
+    case "UI":
+      return {
+        badge: "bg-blue-100 text-blue-800 dark:bg-blue-500/20 dark:text-blue-300 border-transparent hover:bg-blue-100 dark:hover:bg-blue-500/20",
+        cardBg: "bg-blue-50/50 dark:bg-blue-950/10 hover:bg-blue-100/50 dark:hover:bg-blue-950/20 border-blue-100/50 dark:border-blue-900/30",
+      };
+    case "FEATURE":
+    default:
+      return {
+        badge: "bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-300 border-transparent hover:bg-emerald-100 dark:hover:bg-emerald-500/20",
+        cardBg: "bg-emerald-50/50 dark:bg-emerald-950/10 hover:bg-emerald-100/50 dark:hover:bg-emerald-950/20 border-emerald-100/50 dark:border-emerald-900/30",
+      };
+  }
+};
+
 export function FeedbackCard({ feedbackData }: FeedbackCardProps) {
+  const styles = getCategoryStyles(feedbackData.category);
+
   return (
-    <Card className="hover:bg-muted/50 transition-colors cursor-pointer">
+    <Card className={`transition-colors cursor-pointer shadow-sm ${styles.cardBg}`}>
       <CardHeader className="pb-3">
         <div className="flex justify-between items-start gap-4">
           <div className="space-y-1">
@@ -27,7 +51,7 @@ export function FeedbackCard({ feedbackData }: FeedbackCardProps) {
               {feedbackData.description}
             </CardDescription>
           </div>
-          <Badge variant="secondary">{feedbackData.category}</Badge>
+          <Badge variant="outline" className={styles.badge}>{feedbackData.category}</Badge>
         </div>
       </CardHeader>
       <CardContent className="pb-3">
