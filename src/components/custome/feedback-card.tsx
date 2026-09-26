@@ -32,7 +32,14 @@ export function FeedbackCard({ feedbackData }: FeedbackCardProps) {
       </CardHeader>
       <CardContent className="pb-3">
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <span>{feedbackData.profile?.full_name || "Anonymous"}</span>
+          <div className="h-6 w-6 shrink-0 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xs uppercase overflow-hidden border">
+            {feedbackData.profile?.avatar_url ? (
+              <img src={feedbackData.profile.avatar_url} alt={feedbackData.profile.full_name} className="w-full h-full object-cover" />
+            ) : (
+              feedbackData.profile?.full_name?.charAt(0) || "A"
+            )}
+          </div>
+          <span className="font-medium text-foreground/80">{feedbackData.profile?.full_name || "Anonymous"}</span>
           <span>•</span>
           <span>{new Date(feedbackData.created_at).toDateString()}</span>
         </div>
