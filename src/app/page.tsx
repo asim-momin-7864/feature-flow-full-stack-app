@@ -12,7 +12,8 @@ async function FeedbackList() {
     .from("feedback")
     .select(
       `id, created_at, user_id, title, description, category, status, is_deleted, deleted_by_admin, deleted_at,
-      profile( full_name, avatar_url )`, //TODO later we can add user profile pic aslo at side
+      profile( full_name, avatar_url ),
+      comment(count)`,
     )
     .order("created_at", { ascending: false });
 
@@ -34,14 +35,20 @@ async function FeedbackList() {
         // Check if the feedback is deleted
         if (feedback.is_deleted || feedback.deleted_at) {
           return (
-            <div 
-              key={feedback.id} 
+            <div
+              key={feedback.id}
               className="w-full p-6 border border-dashed rounded-xl bg-muted/20 text-muted-foreground text-center text-sm italic flex flex-col items-center gap-1"
             >
-              <span>This feedback was deleted by {feedback.deleted_by_admin ? "an admin" : (feedback.profile?.full_name || "the author")}.</span>
+              <span>
+                This feedback was deleted by{" "}
+                {feedback.deleted_by_admin
+                  ? "an admin"
+                  : feedback.profile?.full_name || "the author"}
+                .
+              </span>
               {feedback.deleted_at && (
                 <span className="text-xs opacity-70">
-                  on {new Date(feedback.deleted_at).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}
+                  {new Date(feedback.deleted_at).toDateString()}
                 </span>
               )}
             </div>
