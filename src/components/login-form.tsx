@@ -15,7 +15,7 @@ import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { GoogleSignInButton } from "./cutome/google-signin-button";
+import { GoogleSignInButton } from "./custome/google-signin-button";
 
 export function LoginForm({
   className,
