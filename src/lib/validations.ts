@@ -11,6 +11,8 @@ export const statusEnum = z.enum([
   "COMPLETED",
 ]);
 
+export type statusEnumType = z.infer<typeof statusEnum>;
+
 // feedback input
 export const CreateFeedbackSchema = z.object({
   title: z.string().min(5, "Title is required"),
@@ -18,4 +20,16 @@ export const CreateFeedbackSchema = z.object({
   category: categoryEnum,
 });
 
-export type FeedbackType = z.infer<typeof CreateFeedbackSchema>;
+export type FeedbackType = z.infer<typeof CreateFeedbackSchema> & {
+  id: string;
+  created_at: string;
+  user_id: string;
+  status: statusEnumType;
+  is_deleted: boolean;
+  deleted_by_admin: boolean;
+  deleted_at: Date | null;
+  profile: {
+    full_name: string;
+    avatar_url: string;
+  };
+};

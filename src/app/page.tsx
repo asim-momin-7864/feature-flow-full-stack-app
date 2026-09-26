@@ -1,17 +1,26 @@
 // it is server component
-import { FeedbackCard } from "@/components/feedback-card";
+import { FeedbackCard } from "@/components/custome/feedback-card";
 import { createClient } from "@/lib/supabase/server";
-import { FeedbackCardType } from "@/components/feedback-card";
+import type { FeedbackType } from "@/lib/validations";
 import { Suspense } from "react";
+import Link from "next/link";
+import { log } from "console";
 
 async function FeedbackList() {
   const supabase = await createClient();
-  const { data: feedbacksArray } = await supabase
+  const { data, error } = await supabase
     .from("feedback")
-    .select("*")
+    .select(
+      `id, created_at, user_id, title, description, category, status, is_deleted, deleted_by_admin, deleted_at,
+      profile( full_name, avatar_url )`, //TODO later we can add user profile pic aslo at side
+    )
     .order("created_at", { ascending: false });
 
-  if (!feedbacksArray || feedbacksArray.length === 0) {
+  const feedbacksArray = data as unknown as FeedbackType[];
+
+  console.log(feedbacksArray);
+
+  if (!feedbacksArray || feedbacksArray.length === 0 || error) {
     return (
       <p className="text-muted-foreground text-center py-10">
         No feedback yet. Be the first to suggest something!
@@ -22,7 +31,9 @@ async function FeedbackList() {
   return (
     <>
       {feedbacksArray.map((feedback) => (
-        <FeedbackCard key={feedback.id} feedbackData={feedback} />
+        <Link href={`/feedback/${feedback.id}`} key={feedback.id}>
+          <FeedbackCard feedbackData={feedback} />
+        </Link>
       ))}
     </>
   );
