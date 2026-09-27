@@ -12,8 +12,9 @@ import CommentList from "@/components/custome/comment-list";
 import { getCategoryStyles } from "@/components/custome/feedback-card";
 import Upvote from "@/components/custome/upvote";
 import { hasUserVoted } from "@/lib/queries";
-import StatusUpdateCard from "@/components/custome/status-update-button";
 import StatusUpdateButton from "@/components/custome/status-update-button";
+import Link from "next/link";
+import { CornerUpLeft } from "lucide-react";
 
 // helper component
 const FeedbackDetailsHelper = async ({
@@ -70,6 +71,7 @@ const FeedbackDetailsHelper = async ({
   const styles = getCategoryStyles(feedbackData.category);
 
   // render
+  // as safety major if use by mistake try to open deleted feedback page details page
   if (feedbackData.is_deleted || feedbackData.deleted_at) {
     return (
       <div className="w-full p-10 mt-10 border border-dashed rounded-xl bg-muted/20 text-muted-foreground text-center text-lg italic flex flex-col items-center gap-2">
@@ -91,6 +93,16 @@ const FeedbackDetailsHelper = async ({
 
   return (
     <div className="w-full space-y-8 animate-in fade-in duration-500">
+      {/* back link */}
+      <div className="mb-6 md:mb-10">
+        <Link
+          href="/"
+          className="group inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors -ml-2 p-2 rounded-md hover:bg-muted/50"
+        >
+          <CornerUpLeft size={16} className="transition-transform group-hover:-translate-x-0.5 group-hover:-translate-y-0.5" />
+          Go back
+        </Link>
+      </div>
       {/* Header Area */}
       <div className="space-y-6">
         <div className="flex items-center gap-3">
@@ -212,7 +224,7 @@ const FeedbackDetailsPage = async ({
   params: Promise<{ id: string }>;
 }) => {
   return (
-    <div className="min-h-screen max-w-4xl mx-auto w-full px-4 py-12 md:py-20 flex flex-col items-start">
+    <div className="min-h-screen max-w-4xl mx-auto w-full px-4 py-8 md:py-12 flex flex-col items-start">
       <Suspense
         fallback={<p className="text-muted-foreground">Loading details...</p>}
       >
