@@ -58,6 +58,10 @@ export type FeedbackType = z.infer<typeof CreateFeedbackSchema> & {
     full_name: string;
     avatar_url: string;
   };
+  // view columns (flat aggregates from vw_feedback_details)
+  upvote_count?: number;
+  comment_count?: number;
+  // legacy relational shapes (kept for compatibility)
   comment?: CommentType[] | [{ count: number }];
   votes?: [{ count: number }];
 };

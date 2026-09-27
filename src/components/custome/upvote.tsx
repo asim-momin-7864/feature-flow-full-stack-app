@@ -13,7 +13,9 @@ const Upvote = ({
   isVoted: boolean;
 }) => {
   const voteCount =
-    (feedbackData.votes as [{ count: number }])?.[0]?.count || 0;
+    feedbackData.upvote_count ??
+    (feedbackData.votes as [{ count: number }])?.[0]?.count ??
+    0;
 
   // form
   const [state, formAction, isPending] = useActionState(toggleVoteAction, {
@@ -29,9 +31,7 @@ const Upvote = ({
       <button
         disabled={isPending}
         className={`group flex items-center gap-1.5 px-3 py-1.5 rounded-full transition-all font-bold bg-primary/10 shadow-sm hover:bg-primary/20 ${
-          isVoted
-            ? "text-primary"
-            : "text-muted-foreground"
+          isVoted ? "text-primary" : "text-muted-foreground"
         }`}
       >
         <ArrowBigUp
