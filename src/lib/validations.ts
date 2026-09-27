@@ -61,3 +61,16 @@ export type FeedbackType = z.infer<typeof CreateFeedbackSchema> & {
   comment?: CommentType[] | [{ count: number }];
   votes?: [{ count: number }];
 };
+
+// trending sidebar — matches the specific select() fields from vw_feedback_details
+export type TrendingFeedbackType = {
+  id: string;
+  title: string;
+  upvote_count: number;
+  is_deleted: boolean;
+  deleted_at: Date | null;
+  profile: {
+    full_name: string;
+    avatar_url: string | null;
+  } | null;
+};
