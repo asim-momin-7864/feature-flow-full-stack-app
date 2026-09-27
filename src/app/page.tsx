@@ -13,7 +13,9 @@ async function FeedbackList() {
     .select(
       `id, created_at, user_id, title, description, category, status, is_deleted, deleted_by_admin, deleted_at,
       profile( full_name, avatar_url ),
-      comment(count)`,
+      comment(count),
+      votes(count)
+      `,
     )
     .order("created_at", { ascending: false });
 
@@ -56,11 +58,7 @@ async function FeedbackList() {
         }
 
         // Normal render
-        return (
-          <Link href={`/feedback/${feedback.id}`} key={feedback.id}>
-            <FeedbackCard feedbackData={feedback} />
-          </Link>
-        );
+        return <FeedbackCard key={feedback.id} feedbackData={feedback} />;
       })}
     </>
   );

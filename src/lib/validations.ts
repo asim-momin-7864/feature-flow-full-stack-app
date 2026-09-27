@@ -32,6 +32,13 @@ export type CommentType = z.infer<typeof CreateCommentSchema> & {
   };
 };
 
+// votes
+export type VotesType = {
+  id: string;
+  feedback_id: string;
+  user_id: string;
+};
+
 // feedback input
 export const CreateFeedbackSchema = z.object({
   title: z.string().min(5, "Title is required"),
@@ -52,4 +59,5 @@ export type FeedbackType = z.infer<typeof CreateFeedbackSchema> & {
     avatar_url: string;
   };
   comment?: CommentType[] | [{ count: number }];
+  votes?: [{ count: number }];
 };

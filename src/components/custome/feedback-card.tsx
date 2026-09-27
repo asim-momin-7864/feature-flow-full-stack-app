@@ -11,6 +11,10 @@ import { Badge } from "@/components/ui/badge";
 import { MessageSquare } from "lucide-react";
 import type { FeedbackType } from "@/lib/validations";
 import { UserAvatar } from "@/components/custome/user-avatar";
+import Upvote from "@/components/custome/upvote";
+import { createClient } from "@/lib/supabase/server";
+import { hasUserVoted } from "@/lib/queries";
+import Link from "next/link";
 
 // feedback card props
 export type FeedbackCardProps = {
@@ -45,48 +49,62 @@ export const getCategoryStyles = (category: string) => {
   }
 };
 
-export function FeedbackCard({ feedbackData }: FeedbackCardProps) {
+export async function FeedbackCard({ feedbackData }: FeedbackCardProps) {
+  const supabase = await createClient();
+  const { data: authData } = await supabase.auth.getUser();
+
+  // current user is check in session and call to hasUserVoted
+  const isVoted = authData.user
+    ? await hasUserVoted(feedbackData.id, authData.user.id)
+    : false;
+
   const styles = getCategoryStyles(feedbackData.category);
 
   return (
     <Card
-      className={`transition-colors cursor-pointer shadow-sm ${styles.cardBg}`}
+      className={`transition-colors shadow-sm ${styles.cardBg}`}
     >
-      <CardHeader className="pb-3">
-        <div className="flex justify-between items-start gap-4">
-          <div className="space-y-1">
-            <CardTitle className="text-xl">{feedbackData.title}</CardTitle>
-            <CardDescription className="line-clamp-2">
-              {feedbackData.description}
-            </CardDescription>
+      <Link href={`/feedback/${feedbackData.id}`} className="block group">
+        <CardHeader className="pb-3 group-hover:opacity-80 transition-opacity">
+          <div className="flex justify-between items-start gap-4">
+            <div className="space-y-1">
+              <CardTitle className="text-xl">{feedbackData.title}</CardTitle>
+              <CardDescription className="line-clamp-2">
+                {feedbackData.description}
+              </CardDescription>
+            </div>
+            <Badge variant="outline" className={styles.badge}>
+              {feedbackData.category}
+            </Badge>
           </div>
-          <Badge variant="outline" className={styles.badge}>
-            {feedbackData.category}
-          </Badge>
-        </div>
-      </CardHeader>
-      <CardContent className="pb-3">
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <div className="h-6 w-6 shrink-0 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xs uppercase overflow-hidden border relative">
-            <UserAvatar 
-              url={feedbackData.profile?.avatar_url} 
-              fallbackText={feedbackData.profile?.full_name?.charAt(0) || "U"} 
-            />
+        </CardHeader>
+        <CardContent className="pb-3 group-hover:opacity-80 transition-opacity">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <div className="h-6 w-6 shrink-0 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xs uppercase overflow-hidden border relative">
+              <UserAvatar
+                url={feedbackData.profile?.avatar_url}
+                fallbackText={feedbackData.profile?.full_name?.charAt(0) || "U"}
+              />
+            </div>
+            <span className="font-medium text-foreground/80">
+              {feedbackData.profile?.full_name || "Anonymous"}
+            </span>
+            <span>•</span>
+            <span>{new Date(feedbackData.created_at).toDateString()}</span>
           </div>
-          <span className="font-medium text-foreground/80">
-            {feedbackData.profile?.full_name || "Anonymous"}
-          </span>
-          <span>•</span>
-          <span>{new Date(feedbackData.created_at).toDateString()}</span>
-        </div>
-      </CardContent>
+        </CardContent>
+      </Link>
       <CardFooter>
-        <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-          <MessageSquare className="w-4 h-4" suppressHydrationWarning />
-          <span>{
-            // @ts-ignore - The count exists based on our select query
-            feedbackData.comment?.[0]?.count || 0
-          } replies</span>
+        <div className="flex items-center gap-4">
+          <Upvote feedbackData={feedbackData} isVoted={isVoted} />
+
+          <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+            <MessageSquare className="w-4 h-4" suppressHydrationWarning />
+            <span>
+              {(feedbackData.comment as [{ count: number }])?.[0]?.count || 0}{" "}
+              replies
+            </span>
+          </div>
         </div>
       </CardFooter>
     </Card>

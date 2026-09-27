@@ -10,6 +10,8 @@ import DeleteButton from "@/components/custome/delete-button";
 import CommentForm from "@/components/custome/comment-form";
 import CommentList from "@/components/custome/comment-list";
 import { getCategoryStyles } from "@/components/custome/feedback-card";
+import Upvote from "@/components/custome/upvote";
+import { hasUserVoted } from "@/lib/queries";
 
 // helper component
 const FeedbackDetailsHelper = async ({
@@ -26,7 +28,10 @@ const FeedbackDetailsHelper = async ({
     .from("feedback")
     .select(
       `id, created_at, user_id, title, description, category, status, is_deleted, deleted_by_admin, deleted_at,
-      profile( full_name, avatar_url )`,
+      profile( full_name, avatar_url ),
+      comment(count),
+      votes(count)
+      `,
     )
     .eq("id", id)
     .single();
@@ -46,6 +51,10 @@ const FeedbackDetailsHelper = async ({
   // get current user to check ownership
   const { data: authData } = await supabase.auth.getUser();
   const isOwner = authData.user?.id === feedbackData.user_id;
+  
+  const isVoted = authData.user 
+    ? await hasUserVoted(feedbackData.id, authData.user.id) 
+    : false;
 
   const styles = getCategoryStyles(feedbackData.category);
 
@@ -104,12 +113,34 @@ const FeedbackDetailsHelper = async ({
         </CardContent>
       </Card>
 
+      <div className="w-full flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 md:p-6 bg-primary/5 rounded-xl border border-primary/10">
+        <div className="space-y-1">
+          <h3 className="font-semibold text-foreground">
+            Do you agree with this feedback?
+          </h3>
+          <p className="text-sm text-muted-foreground">
+            Upvote to help this idea get prioritized by the team!
+          </p>
+        </div>
+        <div className="shrink-0">
+          <Upvote feedbackData={feedbackData} isVoted={isVoted} />
+        </div>
+      </div>
+
       <Separator className="my-10" />
 
       {/* Comments Section */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 w-full">
         <div className="lg:col-span-2 space-y-6">
-          <h2 className="text-2xl font-bold tracking-tight">Comments</h2>
+          <h2 className="text-2xl font-bold tracking-tight flex items-center gap-3">
+            Comments
+            <Badge
+              variant="secondary"
+              className=" bg-primary/20 rounded-full px-3 py-0.5 text-sm font-medium"
+            >
+              {(feedbackData?.comment as [{ count: number }])?.[0]?.count || 0}
+            </Badge>
+          </h2>
           <CommentList feedbackId={feedbackData.id} />
         </div>
 

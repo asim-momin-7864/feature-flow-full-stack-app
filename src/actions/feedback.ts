@@ -122,8 +122,18 @@ export async function deleteFeedbackAction(
   redirect("/");
 }
 
+// voteActionState
+type VoteActionState = {
+  success: boolean;
+  message?: string;
+  error?: string;
+};
+
 // vote toggler
-export const toggleVoteAction = async (formData: FormData): Promise<void> => {
+export const toggleVoteAction = async (
+  prevState: VoteActionState,
+  formData: FormData,
+): Promise<VoteActionState> => {
   // check auth
   const supabase = await createClient();
 
@@ -134,14 +144,17 @@ export const toggleVoteAction = async (formData: FormData): Promise<void> => {
 
   // check
   if (authError || !user) {
-    throw new Error("User not authenticated");
+    return {
+      success: false,
+      error: authError?.message || "User not authenticated",
+    };
   }
 
   // feedback id
-  const feedbackId = String(formData.get("id"));
+  const feedbackId = String(formData.get("feedback_id"));
 
   // isVoted check
-  const isVoted: boolean = Boolean(formData.get("isVoted"));
+  const isVoted: boolean = formData.get("isVoted") === "true";
 
   if (isVoted) {
     // down vote
@@ -153,7 +166,10 @@ export const toggleVoteAction = async (formData: FormData): Promise<void> => {
 
     // check error
     if (error) {
-      console.error("error in down voting");
+      return {
+        success: false,
+        error: error?.message || "Failed to down vote",
+      };
     }
   } else {
     // up vote
@@ -163,7 +179,17 @@ export const toggleVoteAction = async (formData: FormData): Promise<void> => {
     });
 
     if (error) {
-      console.error("error in up voting");
+      return {
+        success: false,
+        error: error?.message || "Failed to up vote",
+      };
     }
   }
+
+  revalidatePath("/");
+
+  return {
+    success: true,
+    message: "Vote toggled successfully",
+  };
 };
