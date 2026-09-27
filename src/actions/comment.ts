@@ -104,10 +104,13 @@ export const deleteCommentAction = async (
   const commentId: string = String(formData.get("comment_id"));
   const feedbackId: string = String(formData.get("feedback_id"));
 
-  // delete
+  // delete (soft delete)
   const { error } = await supabase
     .from("comment")
-    .delete()
+    .update({
+      is_deleted: true,
+      deleted_at: new Date(),
+    })
     .eq("id", commentId)
     .eq("user_id", user.id);
 
@@ -120,7 +123,7 @@ export const deleteCommentAction = async (
   }
 
   // revalidate
-  revalidatePath(`/feedbacks/${feedbackId}`);
+  revalidatePath(`/feedback/${feedbackId}`);
 
   return {
     success: true,

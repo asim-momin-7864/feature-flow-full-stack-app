@@ -56,13 +56,20 @@ const CommentListFetch = async ({ feedbackId }: { feedbackId: string }) => {
                     {new Date(comment.created_at).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
                   </p>
                 </div>
-                {isOwner && (
+                {isOwner && !comment.is_deleted && !comment.deleted_at && (
                   <DeleteCommentButton commentId={comment.id} feedbackId={feedbackId} />
                 )}
               </div>
-              <p className="text-sm text-foreground/90 whitespace-pre-wrap leading-relaxed">
-                {comment.content}
-              </p>
+              
+              {comment.is_deleted || comment.deleted_at ? (
+                <div className="text-sm text-muted-foreground italic border border-dashed rounded-md p-3 bg-muted/20 mt-1">
+                  This comment was deleted by {comment.deleted_by_admin ? "an admin" : "the author"}.
+                </div>
+              ) : (
+                <p className="text-sm text-foreground/90 whitespace-pre-wrap leading-relaxed">
+                  {comment.content}
+                </p>
+              )}
             </div>
           </div>
         );
