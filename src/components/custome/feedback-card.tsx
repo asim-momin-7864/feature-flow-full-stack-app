@@ -19,6 +19,7 @@ import Link from "next/link";
 // feedback card props
 export type FeedbackCardProps = {
   feedbackData: FeedbackType;
+  variant?: "default" | "compact";
 };
 
 // color helper
@@ -49,7 +50,7 @@ export const getCategoryStyles = (category: string) => {
   }
 };
 
-export async function FeedbackCard({ feedbackData }: FeedbackCardProps) {
+export async function FeedbackCard({ feedbackData, variant = "default" }: FeedbackCardProps) {
   const supabase = await createClient();
   const { data: authData } = await supabase.auth.getUser();
 
@@ -60,50 +61,68 @@ export async function FeedbackCard({ feedbackData }: FeedbackCardProps) {
 
   const styles = getCategoryStyles(feedbackData.category);
 
+  const isCompact = variant === "compact";
+
   return (
     <Card
-      className={`transition-colors shadow-sm ${styles.cardBg}`}
+      className={`transition-colors shadow-sm ${styles.cardBg} ${isCompact ? 'overflow-hidden' : ''}`}
     >
       <Link href={`/feedback/${feedbackData.id}`} className="block group">
-        <CardHeader className="pb-3 group-hover:opacity-80 transition-opacity">
-          <div className="flex justify-between items-start gap-4">
+        <CardHeader className={`${isCompact ? 'p-4 pb-3' : 'pb-3'} group-hover:opacity-80 transition-opacity`}>
+          <div className="flex justify-between items-start gap-3">
             <div className="space-y-1">
-              <CardTitle className="text-xl">{feedbackData.title}</CardTitle>
-              <CardDescription className="line-clamp-2">
+              <CardTitle className={isCompact ? "text-sm font-semibold leading-snug" : "text-xl"}>
+                {feedbackData.title}
+              </CardTitle>
+              <CardDescription className={isCompact ? "line-clamp-2 text-xs opacity-80" : "line-clamp-2"}>
                 {feedbackData.description}
               </CardDescription>
             </div>
-            <Badge variant="outline" className={styles.badge}>
-              {feedbackData.category}
-            </Badge>
+            {!isCompact && (
+              <Badge variant="outline" className={styles.badge}>
+                {feedbackData.category}
+              </Badge>
+            )}
           </div>
         </CardHeader>
-        <CardContent className="pb-3 group-hover:opacity-80 transition-opacity">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <div className="h-6 w-6 shrink-0 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xs uppercase overflow-hidden border relative">
-              <UserAvatar
-                url={feedbackData.profile?.avatar_url}
-                fallbackText={feedbackData.profile?.full_name?.charAt(0) || "U"}
-              />
+        {!isCompact && (
+          <CardContent className="pb-3 group-hover:opacity-80 transition-opacity">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <div className="h-6 w-6 shrink-0 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xs uppercase overflow-hidden border relative">
+                <UserAvatar
+                  url={feedbackData.profile?.avatar_url}
+                  fallbackText={feedbackData.profile?.full_name?.charAt(0) || "U"}
+                />
+              </div>
+              <span className="font-medium text-foreground/80">
+                {feedbackData.profile?.full_name || "Anonymous"}
+              </span>
+              <span>•</span>
+              <span>{new Date(feedbackData.created_at).toDateString()}</span>
             </div>
-            <span className="font-medium text-foreground/80">
-              {feedbackData.profile?.full_name || "Anonymous"}
-            </span>
-            <span>•</span>
-            <span>{new Date(feedbackData.created_at).toDateString()}</span>
-          </div>
-        </CardContent>
+          </CardContent>
+        )}
       </Link>
-      <CardFooter>
-        <div className="flex items-center gap-4">
+      <CardFooter className={isCompact ? 'p-4 pt-0' : ''}>
+        <div className={`flex items-center w-full ${isCompact ? 'justify-between' : 'gap-4'}`}>
           <Upvote feedbackData={feedbackData} isVoted={isVoted} />
 
-          <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-            <MessageSquare className="w-4 h-4" suppressHydrationWarning />
-            <span>
-              {(feedbackData.comment as [{ count: number }])?.[0]?.count || 0}{" "}
-              replies
-            </span>
+          <div className="flex items-center gap-3 text-sm text-muted-foreground">
+            {isCompact && (
+              <div className="h-5 w-5 shrink-0 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-[10px] uppercase overflow-hidden border relative">
+                <UserAvatar
+                  url={feedbackData.profile?.avatar_url}
+                  fallbackText={feedbackData.profile?.full_name?.charAt(0) || "U"}
+                />
+              </div>
+            )}
+            <div className="flex items-center gap-1.5">
+              <MessageSquare className="w-4 h-4" suppressHydrationWarning />
+              <span>
+                {(feedbackData.comment as [{ count: number }])?.[0]?.count || 0}
+                {!isCompact && " replies"}
+              </span>
+            </div>
           </div>
         </div>
       </CardFooter>

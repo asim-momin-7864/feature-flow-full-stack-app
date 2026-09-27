@@ -11,6 +11,9 @@ export function Navbar() {
       <div className="w-full max-w-5xl flex justify-between items-center p-3 px-5 text-sm">
         <div className="flex gap-5 items-center font-semibold">
           <Link href={"/"}>Feature Flow</Link>
+          <div className="flex items-center gap-4 ml-4 font-normal text-muted-foreground">
+            <Link href={"/roadmap"} className="hover:text-foreground transition-colors">Roadmap</Link>
+          </div>
         </div>
         <div className="flex gap-4 items-center">
           <ThemeSwitcher />
