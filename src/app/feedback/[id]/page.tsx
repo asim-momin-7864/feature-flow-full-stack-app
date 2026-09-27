@@ -12,6 +12,8 @@ import CommentList from "@/components/custome/comment-list";
 import { getCategoryStyles } from "@/components/custome/feedback-card";
 import Upvote from "@/components/custome/upvote";
 import { hasUserVoted } from "@/lib/queries";
+import StatusUpdateCard from "@/components/custome/status-update-button";
+import StatusUpdateButton from "@/components/custome/status-update-button";
 
 // helper component
 const FeedbackDetailsHelper = async ({
@@ -154,6 +156,28 @@ const FeedbackDetailsHelper = async ({
           <Upvote feedbackData={feedbackData} isVoted={isVoted} />
         </div>
       </div>
+
+      {isAdmin && (
+        <div className="w-full flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 md:p-6 bg-secondary/30 rounded-xl border border-border border-dashed shadow-sm">
+          <div className="space-y-1">
+            <h3 className="font-semibold text-foreground flex items-center gap-2">
+              <span className="bg-primary/10 text-primary px-2 py-0.5 rounded text-xs tracking-wider font-bold uppercase">
+                Admin
+              </span>
+              Update Status
+            </h3>
+            <p className="text-sm text-muted-foreground">
+              Change the progress status of this feedback.
+            </p>
+          </div>
+          <div className="shrink-0">
+            <StatusUpdateButton
+              feedback_id={feedbackData.id}
+              currentState={feedbackData.status}
+            />
+          </div>
+        </div>
+      )}
 
       <Separator className="my-10" />
 
