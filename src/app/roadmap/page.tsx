@@ -14,14 +14,8 @@ const statuses = [
 async function RoadmapBoard() {
   const supabase = await createClient();
   const { data, error } = await supabase
-    .from("feedback")
-    .select(
-      `id, created_at, user_id, title, description, category, status, is_deleted, deleted_by_admin, deleted_at,
-      profile( full_name, avatar_url ),
-      comment(count),
-      votes(count)
-      `,
-    )
+    .from("vw_feedback_details")
+    .select("*")
     .order("created_at", { ascending: false });
 
   const feedbacksArray = data as unknown as FeedbackType[];
