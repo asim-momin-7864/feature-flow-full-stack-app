@@ -104,15 +104,24 @@ export const deleteCommentAction = async (
   const commentId: string = String(formData.get("comment_id"));
   const feedbackId: string = String(formData.get("feedback_id"));
 
+  // Check if the user is an admin
+  const { data: profile } = await supabase
+    .from("profile")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  const isAdmin = profile?.role === "ADMIN";
+
   // delete (soft delete)
   const { error } = await supabase
     .from("comment")
     .update({
       is_deleted: true,
+      deleted_by_admin: isAdmin,
       deleted_at: new Date(),
     })
-    .eq("id", commentId)
-    .eq("user_id", user.id);
+    .eq("id", commentId);
 
   // check error
   if (error) {

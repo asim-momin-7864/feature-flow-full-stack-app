@@ -99,15 +99,24 @@ export async function deleteFeedbackAction(
   // feedback id
   const feedbackId: string = String(formData.get("id"));
 
+  // Check if the user is an admin
+  const { data: profile } = await supabase
+    .from("profile")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  const isAdmin = profile?.role === "ADMIN";
+
   // delete (soft delete)
   const { error } = await supabase
     .from("feedback")
     .update({
       is_deleted: true,
+      deleted_by_admin: isAdmin,
       deleted_at: new Date(),
     })
-    .eq("id", feedbackId)
-    .eq("user_id", user.id);
+    .eq("id", feedbackId);
 
   // check error
   if (error) {

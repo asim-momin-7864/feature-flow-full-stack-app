@@ -28,7 +28,7 @@ const FeedbackDetailsHelper = async ({
     .from("feedback")
     .select(
       `id, created_at, user_id, title, description, category, status, is_deleted, deleted_by_admin, deleted_at,
-      profile( full_name, avatar_url ),
+      profile( id, full_name, avatar_url, role ),
       comment(count),
       votes(count)
       `,
@@ -48,17 +48,45 @@ const FeedbackDetailsHelper = async ({
   // type casting
   const feedbackData = data as unknown as FeedbackType;
 
-  // get current user to check ownership
+  // get current user to check ownership and role
   const { data: authData } = await supabase.auth.getUser();
   const isOwner = authData.user?.id === feedbackData.user_id;
-  
-  const isVoted = authData.user 
-    ? await hasUserVoted(feedbackData.id, authData.user.id) 
+  let isAdmin = false;
+  if (authData.user) {
+    const { data: profile } = await supabase
+      .from("profile")
+      .select("role")
+      .eq("id", authData.user.id)
+      .single();
+    isAdmin = profile?.role === "ADMIN";
+  }
+
+  const isVoted = authData.user
+    ? await hasUserVoted(feedbackData.id, authData.user.id)
     : false;
 
   const styles = getCategoryStyles(feedbackData.category);
 
   // render
+  if (feedbackData.is_deleted || feedbackData.deleted_at) {
+    return (
+      <div className="w-full p-10 mt-10 border border-dashed rounded-xl bg-muted/20 text-muted-foreground text-center text-lg italic flex flex-col items-center gap-2">
+        <span>
+          This feedback was deleted by{" "}
+          {feedbackData.deleted_by_admin
+            ? "an admin"
+            : feedbackData.profile?.full_name || "the author"}
+          .
+        </span>
+        {feedbackData.deleted_at && (
+          <span className="text-sm opacity-70">
+            {new Date(feedbackData.deleted_at).toDateString()}
+          </span>
+        )}
+      </div>
+    );
+  }
+
   return (
     <div className="w-full space-y-8 animate-in fade-in duration-500">
       {/* Header Area */}
@@ -82,7 +110,7 @@ const FeedbackDetailsHelper = async ({
           <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight text-foreground leading-tight">
             {feedbackData.title}
           </h1>
-          {isOwner && (
+          {(isOwner || isAdmin) && (
             <div className="pt-1 md:pt-2 shrink-0">
               <DeleteButton id={id} />
             </div>
