@@ -5,9 +5,7 @@
 import { createClient } from "@/lib/supabase/server";
 // enum type
 import { type statusEnumType } from "@/lib/validations";
-import { profile } from "console";
 import { revalidatePath } from "next/cache";
-import { fromTheme } from "tailwind-merge";
 
 // action state
 type ActionState = {
@@ -21,52 +19,52 @@ export const updateStatusAdminAction = async (
   prevState: ActionState,
   formData: FormData,
 ): Promise<ActionState> => {
-  // check user
+  // check user loggedin
   const supabase = await createClient();
+  const { data: authData, error: authError } = await supabase.auth.getUser();
 
-  const { data: user, error: authError } = await supabase.auth.getUser();
-
-  // check auth error
-  if (authError || !user) {
+  if (authError || !authData.user) {
     return {
       success: false,
       error: authError?.message || "User not authenticated",
     };
   }
 
-  // check role
-  const { data: profile, error } = await supabase
+  // check if user is admin
+  const { data: profile, error: profileError } = await supabase
     .from("profile")
     .select("role")
-    .eq("id", user?.user?.id)
+    .eq("id", authData.user.id)
     .single();
 
-  // check role
-  if (error || !profile || profile.role !== "ADMIN") {
+  if (profileError || !profile || profile.role !== "ADMIN") {
     return {
       success: false,
       error: "You are not authorized to perform this action",
     };
   }
 
-  // feedback id
-  const feedback_id = formData.get("feedback_id") as string;
+  // data from form
+  const feedbackId = formData.get("feedback_id") as string;
   const updatedStatus = formData.get("status") as statusEnumType;
 
-  // update
-  await supabase
+  // update the status in database
+  const { error: updateError } = await supabase
     .from("feedback")
-    .update({
-      status: updatedStatus,
-    })
-    .eq("id", feedback_id);
+    .update({ status: updatedStatus })
+    .eq("id", feedbackId);
 
-  //   revalidate
+  if (updateError) {
+    return {
+      success: false,
+      error: updateError.message,
+    };
+  }
 
-  revalidatePath(`/feedback/${feedback_id}`);
+  // revalidate
+  revalidatePath(`/feedback/${feedbackId}`);
   revalidatePath("/");
 
-  //
   return {
     success: true,
     message: "Status updated successfully",

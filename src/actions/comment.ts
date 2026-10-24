@@ -10,9 +10,7 @@ const CommentSchema = z.object({
   content: z.string().min(5, "Comment is too short"),
 });
 
-type CommentsType = z.infer<typeof CommentSchema>;
-
-// action state
+// What this action returns to the form
 type ActionState = {
   success: boolean;
   message?: string;
@@ -21,19 +19,17 @@ type ActionState = {
   };
 };
 
-// server action
+// create new comment
 export const createCommentAction = async (
   prevState: ActionState,
   formData: FormData,
 ): Promise<ActionState> => {
-  // check user
   const supabase = await createClient();
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser();
 
-  if (authError || !user) {
+  // Check user is logged in
+  const { data: authData, error: authError } = await supabase.auth.getUser();
+
+  if (authError || !authData.user) {
     return {
       success: false,
       message: authError?.message || "User not authenticated",
@@ -55,12 +51,12 @@ export const createCommentAction = async (
 
   // validated data
   const { content } = validatedData.data;
-  const feedbackId: string = String(formData.get("feedback_id"));
+  const feedbackId = String(formData.get("feedback_id"));
 
   // insert
   const { error } = await supabase.from("comment").insert({
     content,
-    user_id: user.id,
+    user_id: authData.user.id,
     feedback_id: feedbackId,
   });
 
@@ -68,7 +64,7 @@ export const createCommentAction = async (
   if (error) {
     return {
       success: false,
-      message: error.message || "Failed to create comment",
+      message: error.message,
     };
   }
 
@@ -81,34 +77,32 @@ export const createCommentAction = async (
   };
 };
 
-// delete comment
+// soft delete comment
 export const deleteCommentAction = async (
   prevState: ActionState,
   formData: FormData,
 ): Promise<ActionState> => {
   // check user
   const supabase = await createClient();
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser();
 
-  if (authError || !user) {
+  // user logged
+  const { data: authData, error: authError } = await supabase.auth.getUser();
+
+  if (authError || !authData.user) {
     return {
       success: false,
       message: authError?.message || "User not authenticated",
     };
   }
 
-  // validated data
-  const commentId: string = String(formData.get("comment_id"));
-  const feedbackId: string = String(formData.get("feedback_id"));
+  const commentId = String(formData.get("comment_id"));
+  const feedbackId = String(formData.get("feedback_id"));
 
   // Check if the user is an admin
   const { data: profile } = await supabase
     .from("profile")
     .select("role")
-    .eq("id", user.id)
+    .eq("id", authData.user.id)
     .single();
 
   const isAdmin = profile?.role === "ADMIN";
@@ -127,7 +121,7 @@ export const deleteCommentAction = async (
   if (error) {
     return {
       success: false,
-      message: error.message || "Failed to delete comment",
+      message: error.message,
     };
   }
 

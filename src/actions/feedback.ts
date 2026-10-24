@@ -8,7 +8,7 @@ import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
-// Action State - server action return actions state (or custome also)
+// Action State - what all server actions return to form
 export type ActionState = {
   success: boolean;
   errors?: {
@@ -27,22 +27,17 @@ export async function createFeedbackAction(
 ): Promise<ActionState> {
   // check user is authenticated
   const supabase = await createClient();
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser();
+  const { data: authData, error: authError } = await supabase.auth.getUser();
 
-  // check
-  if (authError || !user) {
+  if (authError || !authData.user) {
     return {
       success: false,
       message: authError?.message || "User not authenticated",
     };
   }
 
-  // parse
+  // parse and validation
   const rawData = Object.fromEntries(formData.entries());
-
   const validatedData = CreateFeedbackSchema.safeParse(rawData);
 
   // check
@@ -56,54 +51,51 @@ export async function createFeedbackAction(
   // insert
   const { error } = await supabase.from("feedback").insert({
     ...validatedData.data,
-    user_id: user.id, // for RLS
+    user_id: authData.user.id, // needed for RLS
   });
 
   // check
   if (error) {
-    console.error(`Error creating feedback:`, error.message);
+    console.error("Error creating feedback:", error.message);
     return {
       success: false,
-      message: error.message || "Failed to create feedback",
+      message: error.message,
     };
   }
 
-  // revalidated
-  revalidatePath("/feedbacks");
+  // revalidate
+  revalidatePath("/");
+
   return {
     success: true,
     message: "Feedback created successfully!",
   };
 }
 
-// delete feedback action
+// soft delete feedback action
 export async function deleteFeedbackAction(
   prevState: ActionState,
   formData: FormData,
 ) {
   // check user is authenticated
   const supabase = await createClient();
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser();
+  // logged-in
+  const { data: authData, error: authError } = await supabase.auth.getUser();
 
-  // check
-  if (authError || !user) {
+  if (authError || !authData.user) {
     return {
       success: false,
       message: authError?.message || "User not authenticated",
     };
   }
 
-  // feedback id
-  const feedbackId: string = String(formData.get("id"));
+  const feedbackId = String(formData.get("id"));
 
   // Check if the user is an admin
   const { data: profile } = await supabase
     .from("profile")
     .select("role")
-    .eq("id", user.id)
+    .eq("id", authData.user.id)
     .single();
 
   const isAdmin = profile?.role === "ADMIN";
@@ -118,16 +110,16 @@ export async function deleteFeedbackAction(
     })
     .eq("id", feedbackId);
 
-  // check error
   if (error) {
     return {
       success: false,
-      message: error?.message || "Failed to delete feedback",
+      message: error.message,
     };
   }
 
-  // revalidated
-  revalidatePath("/feedbacks");
+  // revalidate
+  revalidatePath("/");
+  // redirect home
   redirect("/");
 }
 
@@ -145,56 +137,43 @@ export const toggleVoteAction = async (
 ): Promise<VoteActionState> => {
   // check auth
   const supabase = await createClient();
+  const { data: authData, error: authError } = await supabase.auth.getUser();
 
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser();
-
-  // check
-  if (authError || !user) {
+  if (authError || !authData.user) {
     return {
       success: false,
       error: authError?.message || "User not authenticated",
     };
   }
 
-  // feedback id
   const feedbackId = String(formData.get("feedback_id"));
-
-  // isVoted check
-  const isVoted: boolean = formData.get("isVoted") === "true";
+  const isVoted = formData.get("isVoted") === "true";
 
   if (isVoted) {
     // down vote
     const { error } = await supabase
       .from("votes")
       .delete()
-      .eq("user_id", user.id)
+      .eq("user_id", authData.user.id)
       .eq("feedback_id", feedbackId);
 
     // check error
     if (error) {
-      return {
-        success: false,
-        error: error?.message || "Failed to down vote",
-      };
+      return { success: false, error: error.message };
     }
   } else {
-    // up vote
+    // upvote
     const { error } = await supabase.from("votes").insert({
       feedback_id: feedbackId,
-      user_id: user.id,
+      user_id: authData.user.id,
     });
 
     if (error) {
-      return {
-        success: false,
-        error: error?.message || "Failed to up vote",
-      };
+      return { success: false, error: error.message };
     }
   }
 
+  // revalidate
   revalidatePath("/");
 
   return {
