@@ -1,12 +1,12 @@
-// server action for 0auth google
+// server action for OAuth google, login, signup, signout
 
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-
 import { headers } from "next/headers";
 
+// google oauth
 export async function signInWithGoogle() {
   const supabase = await createClient();
   const origin = (await headers()).get("origin") ?? "http://localhost:3000";
@@ -21,37 +21,39 @@ export async function signInWithGoogle() {
   // check
   if (error) {
     console.error(`OAuth Error: `, error.message);
+    return;
   }
 
+  // redirect to google login page
   if (data.url) {
-    redirect(data.url); // Redirect to the OAuth provider's page
+    redirect(data.url);
   }
 }
 
+// signout
 export async function signOutAction() {
   const supabase = await createClient();
   await supabase.auth.signOut();
   redirect("/auth/login");
 }
 
+// auth state for login and signup
 export type AuthState = {
   success: boolean;
   message?: string;
 } | null;
 
+// login func
 export async function loginAction(
   prevState: AuthState,
-  formData: FormData
+  formData: FormData,
 ): Promise<AuthState> {
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
 
   const supabase = await createClient();
 
-  const { error } = await supabase.auth.signInWithPassword({
-    email,
-    password,
-  });
+  const { error } = await supabase.auth.signInWithPassword({ email, password });
 
   if (error) {
     return { success: false, message: error.message };
@@ -60,9 +62,10 @@ export async function loginAction(
   redirect("/");
 }
 
+// signup func
 export async function signupAction(
   prevState: AuthState,
-  formData: FormData
+  formData: FormData,
 ): Promise<AuthState> {
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
