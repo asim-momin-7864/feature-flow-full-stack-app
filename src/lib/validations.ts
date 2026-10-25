@@ -71,6 +71,7 @@ export type FeedbackType = z.infer<typeof CreateFeedbackSchema> & {
 export type TrendingFeedbackType = {
   id: string;
   title: string;
+  vote_count?: number;
   upvote_count?: number;
   is_deleted: boolean;
   deleted_at: Date | null;

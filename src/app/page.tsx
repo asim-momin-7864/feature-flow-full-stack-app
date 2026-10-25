@@ -66,10 +66,14 @@ async function TrendingSidebar() {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("vw_feedback_details")
-    .select("id, title, upvote_count, is_deleted, deleted_at, profile")
+    .select("id, title, vote_count, is_deleted, deleted_at, profile")
     .eq("is_deleted", false)
-    .order("upvote_count", { ascending: false })
+    .order("vote_count", { ascending: false })
     .limit(5);
+
+  if (error) {
+    console.error("TrendingSidebar error:", error.message);
+  }
 
   if (!data || error || data.length === 0) return null;
 
@@ -106,7 +110,7 @@ async function TrendingSidebar() {
 
               <div className="flex items-center gap-1 text-xs font-semibold text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
                 <ArrowUp className="w-3 h-3 text-emerald-500" />
-                <span>{feedback.upvote_count || 0}</span>
+                <span>{feedback.vote_count ?? feedback.upvote_count ?? 0}</span>
               </div>
             </div>
           </Link>
