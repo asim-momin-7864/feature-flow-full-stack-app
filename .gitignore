@@ -40,3 +40,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# test
+/ff-sql-simple
+dummy-feedbacks-and-comments.txt
+remainding-reading-note.txt
