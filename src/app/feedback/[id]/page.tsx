@@ -28,14 +28,8 @@ const FeedbackDetailsHelper = async ({
   // fetch data
   const supabase = await createClient();
   const { data, error } = await supabase
-    .from("feedback")
-    .select(
-      `id, created_at, user_id, title, description, category, status, is_deleted, deleted_by_admin, deleted_at,
-      profile( id, full_name, avatar_url, role ),
-      comment(count),
-      votes(count)
-      `,
-    )
+    .from("vw_feedback_details")
+    .select("*")
     .eq("id", id)
     .single();
 
@@ -202,7 +196,9 @@ const FeedbackDetailsHelper = async ({
               variant="secondary"
               className=" bg-primary/20 rounded-full px-3 py-0.5 text-sm font-medium"
             >
-              {(feedbackData?.comment as [{ count: number }])?.[0]?.count || 0}
+              {feedbackData.comment_count ??
+                (feedbackData?.comment as [{ count: number }])?.[0]?.count ??
+                0}
             </Badge>
           </h2>
           <CommentList feedbackId={feedbackData.id} />

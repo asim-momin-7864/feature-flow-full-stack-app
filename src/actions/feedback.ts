@@ -7,6 +7,7 @@ import { CreateFeedbackSchema } from "@/lib/validations";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import ensureProfile from "@/lib/ensure-profile";
 
 // Action State - what all server actions return to form
 export type ActionState = {
@@ -140,41 +141,54 @@ export const toggleVoteAction = async (
   const { data: authData, error: authError } = await supabase.auth.getUser();
 
   if (authError || !authData.user) {
-    return {
-      success: false,
-      error: authError?.message || "User not authenticated",
-    };
+    redirect("/auth/login");
   }
 
+  // ensure profile exists (prevents foreign key errors on votes.user_id)
+  await ensureProfile();
+
   const feedbackId = String(formData.get("feedback_id"));
-  const isVoted = formData.get("isVoted") === "true";
 
-  if (isVoted) {
-    // down vote
+  // Check database directly to see if user has already voted
+  const { data: existingVote, error: fetchVoteError } = await supabase
+    .from("vote")
+    .select("id")
+    .eq("user_id", authData.user.id)
+    .eq("feedback_id", feedbackId)
+    .maybeSingle();
+
+  if (fetchVoteError) {
+    console.error("Error fetching vote status:", fetchVoteError.message);
+  }
+
+  if (existingVote) {
+    // down vote / unvote
     const { error } = await supabase
-      .from("votes")
+      .from("vote")
       .delete()
-      .eq("user_id", authData.user.id)
-      .eq("feedback_id", feedbackId);
+      .eq("id", existingVote.id);
 
-    // check error
     if (error) {
+      console.error("Error removing vote:", error.message);
       return { success: false, error: error.message };
     }
   } else {
     // upvote
-    const { error } = await supabase.from("votes").insert({
+    const { error } = await supabase.from("vote").insert({
       feedback_id: feedbackId,
       user_id: authData.user.id,
     });
 
     if (error) {
+      console.error("Error inserting vote:", error.message);
       return { success: false, error: error.message };
     }
   }
 
-  // revalidate
+  // revalidate all path where vote show
   revalidatePath("/");
+  revalidatePath("/roadmap");
+  revalidatePath(`/feedback/${feedbackId}`);
 
   return {
     success: true,
