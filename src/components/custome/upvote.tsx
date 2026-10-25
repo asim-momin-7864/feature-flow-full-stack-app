@@ -1,6 +1,6 @@
 "use client";
 import { FeedbackType } from "@/lib/validations";
-import { ArrowBigUp } from "lucide-react";
+import { ArrowBigUp, Loader2 } from "lucide-react";
 import { toggleVoteAction } from "@/actions/feedback";
 import { useActionState } from "react";
 
@@ -13,6 +13,7 @@ const Upvote = ({
   isVoted: boolean;
 }) => {
   const voteCount =
+    feedbackData.vote_count ??
     feedbackData.upvote_count ??
     (feedbackData.votes as [{ count: number }])?.[0]?.count ??
     0;
@@ -27,19 +28,25 @@ const Upvote = ({
   return (
     <form action={formAction}>
       <input type="hidden" name="feedback_id" value={feedbackData.id} />
-      <input type="hidden" name="isVoted" value={String(isVoted)} />
       <button
+        type="submit"
         disabled={isPending}
         className={`group flex items-center gap-1.5 px-3 py-1.5 rounded-full transition-all font-bold bg-primary/10 shadow-sm hover:bg-primary/20 ${
-          isVoted ? "text-primary" : "text-muted-foreground"
+          isPending ? "opacity-70 cursor-wait" : "cursor-pointer"
+        } ${
+          isVoted ? "text-primary bg-primary/20" : "text-muted-foreground"
         }`}
       >
-        <ArrowBigUp
-          className={`w-5 h-5 transition-transform duration-300 ${
-            isVoted ? "scale-110" : "group-hover:-translate-y-0.5"
-          }`}
-          fill={isVoted ? "currentColor" : "none"}
-        />
+        {isPending ? (
+          <Loader2 className="w-5 h-5 animate-spin text-primary" />
+        ) : (
+          <ArrowBigUp
+            className={`w-5 h-5 transition-transform duration-300 ${
+              isVoted ? "scale-110 text-primary" : "group-hover:-translate-y-0.5"
+            }`}
+            fill={isVoted ? "currentColor" : "none"}
+          />
+        )}
         <span className="text-sm">{voteCount}</span>
       </button>
     </form>
