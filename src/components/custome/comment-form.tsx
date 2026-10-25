@@ -12,21 +12,27 @@ const CommentForm = ({ feedback_id }: { feedback_id: string }) => {
     message: "",
   });
   return (
-    <Card className="sticky top-6 border-muted/60 shadow-sm">
-      <CardHeader className="pb-4">
-        <CardTitle className="text-lg font-bold">Leave a comment</CardTitle>
+    <Card className="lg:sticky lg:top-24 border-muted/60 shadow-sm">
+      <CardHeader className="p-4 sm:p-5 pb-2 sm:pb-3">
+        <CardTitle className="text-base sm:text-lg font-bold">Leave a comment</CardTitle>
       </CardHeader>
       <form action={formAction}>
         <input type="hidden" name="feedback_id" value={feedback_id} />
-        <CardContent>
-          <div className="space-y-4">
+        <CardContent className="p-4 sm:p-5 pt-0 sm:pt-0">
+          <div className="space-y-3 sm:space-y-4">
             <Textarea
               placeholder="Share your thoughts or suggest an idea..."
-              className="min-h-30 resize-y focus-visible:ring-primary/50"
+              className="min-h-24 sm:min-h-28 text-xs sm:text-sm resize-y focus-visible:ring-primary/50"
               name="content"
+              required
             />
-            <Button type="submit" className="w-full font-semibold">
-              Post Comment
+            {state && !state.success && state.message && (
+              <p className="text-destructive text-xs sm:text-sm font-medium">
+                {state.message}
+              </p>
+            )}
+            <Button type="submit" disabled={isPending} className="w-full font-semibold text-xs sm:text-sm">
+              {isPending ? "Posting..." : "Post Comment"}
             </Button>
           </div>
         </CardContent>

@@ -45,32 +45,32 @@ export function ForgotPasswordForm({
   };
 
   return (
-    <div className={cn("flex flex-col gap-6", className)} {...props}>
+    <div className={cn("flex flex-col gap-4 sm:gap-6", className)} {...props}>
       {success ? (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-2xl">Check Your Email</CardTitle>
-            <CardDescription>Password reset instructions sent</CardDescription>
+        <Card className="shadow-sm">
+          <CardHeader className="p-4 sm:p-6 pb-2 sm:pb-3">
+            <CardTitle className="text-xl sm:text-2xl font-bold">Check Your Email</CardTitle>
+            <CardDescription className="text-xs sm:text-sm">Password reset instructions sent</CardDescription>
           </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">
+          <CardContent className="p-4 sm:p-6 pt-2 sm:pt-4">
+            <p className="text-xs sm:text-sm text-muted-foreground">
               If you registered using your email and password, you will receive
               a password reset email.
             </p>
           </CardContent>
         </Card>
       ) : (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-2xl">Reset Your Password</CardTitle>
-            <CardDescription>
+        <Card className="shadow-sm">
+          <CardHeader className="p-4 sm:p-6 pb-2 sm:pb-3">
+            <CardTitle className="text-xl sm:text-2xl font-bold">Reset Your Password</CardTitle>
+            <CardDescription className="text-xs sm:text-sm">
               Type in your email and we&apos;ll send you a link to reset your
               password
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-4 sm:p-6 pt-2 sm:pt-4">
             <form onSubmit={handleForgotPassword}>
-              <div className="flex flex-col gap-6">
+              <div className="flex flex-col gap-4 sm:gap-6">
                 <div className="grid gap-2">
                   <Label htmlFor="email">Email</Label>
                   <Input

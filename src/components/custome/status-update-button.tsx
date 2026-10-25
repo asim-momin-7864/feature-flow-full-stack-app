@@ -54,7 +54,7 @@ const StatusUpdateButton = ({
             }
           }}
         >
-          <SelectTrigger className="w-45 bg-background shadow-sm">
+          <SelectTrigger className="w-full sm:w-44 bg-background shadow-sm text-xs sm:text-sm">
             <SelectValue placeholder="Status" />
           </SelectTrigger>
           <SelectContent>

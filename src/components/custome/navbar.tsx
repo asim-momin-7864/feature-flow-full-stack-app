@@ -7,17 +7,27 @@ import { Suspense } from "react";
 
 export function Navbar() {
   return (
-    <nav className="w-full flex justify-center border-b border-b-foreground/10 h-16">
-      <div className="w-full max-w-5xl flex justify-between items-center p-3 px-5 text-sm">
-        <div className="flex gap-5 items-center font-semibold">
-          <Link href={"/"}>Feature Flow</Link>
-          <div className="flex items-center gap-4 ml-4 font-normal text-muted-foreground">
-            <Link href={"/roadmap"} className="hover:text-foreground transition-colors">Roadmap</Link>
-          </div>
+    <nav className="w-full flex justify-center border-b border-b-foreground/10 h-16 sticky top-0 bg-background/80 backdrop-blur-md z-40">
+      <div className="w-full max-w-5xl flex justify-between items-center px-3 sm:px-6 text-sm gap-2">
+        {/* Left: Brand and Roadmap */}
+        <div className="flex items-center gap-3 sm:gap-6 font-semibold">
+          <Link
+            href="/"
+            className="font-bold text-sm sm:text-base tracking-tight shrink-0 hover:opacity-80 transition-opacity"
+          >
+            Feature Flow
+          </Link>
+          <Link
+            href="/roadmap"
+            className="text-xs sm:text-sm font-normal text-muted-foreground hover:text-foreground transition-colors"
+          >
+            Roadmap
+          </Link>
         </div>
-        <div className="flex gap-4 items-center">
+
+        {/* Right: Actions, Theme, Auth */}
+        <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
           <ThemeSwitcher />
-          <Link href={"/feedback/new"}>New Feedback</Link>
           {!hasEnvVars ? (
             <EnvVarWarning />
           ) : (

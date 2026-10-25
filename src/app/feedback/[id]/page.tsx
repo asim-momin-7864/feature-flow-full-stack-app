@@ -86,46 +86,47 @@ const FeedbackDetailsHelper = async ({
   }
 
   return (
-    <div className="w-full space-y-8 animate-in fade-in duration-500">
+    <div className="w-full space-y-6 sm:space-y-8 animate-in fade-in duration-500">
       {/* back link */}
-      <div className="mb-6 md:mb-10">
+      <div className="mb-4 sm:mb-6">
         <Link
           href="/"
-          className="group inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors -ml-2 p-2 rounded-md hover:bg-muted/50"
+          className="group inline-flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-medium text-muted-foreground hover:text-foreground transition-colors -ml-2 p-2 rounded-md hover:bg-muted/50"
         >
           <CornerUpLeft size={16} className="transition-transform group-hover:-translate-x-0.5 group-hover:-translate-y-0.5" />
           Go back
         </Link>
       </div>
+
       {/* Header Area */}
-      <div className="space-y-6">
-        <div className="flex items-center gap-3">
+      <div className="space-y-4 sm:space-y-6">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
           <Badge
             variant="outline"
-            className={`px-3 py-1 text-sm font-semibold rounded-md ${styles.badge}`}
+            className={`px-2.5 py-0.5 sm:px-3 sm:py-1 text-xs sm:text-sm font-semibold rounded-md ${styles.badge}`}
           >
             {feedbackData.category}
           </Badge>
           <Badge
             variant="outline"
-            className="capitalize px-3 py-1 text-sm rounded-md"
+            className="capitalize px-2.5 py-0.5 sm:px-3 sm:py-1 text-xs sm:text-sm rounded-md"
           >
             {feedbackData.status.toLowerCase().replace("_", " ")}
           </Badge>
         </div>
 
-        <div className="flex items-start justify-between gap-4">
-          <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight text-foreground leading-tight">
+        <div className="flex items-start justify-between gap-3 sm:gap-4">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-foreground leading-tight break-words flex-1 min-w-0">
             {feedbackData.title}
           </h1>
           {(isOwner || isAdmin) && (
-            <div className="pt-1 md:pt-2 shrink-0">
+            <div className="pt-0.5 sm:pt-1 shrink-0">
               <DeleteButton id={id} />
             </div>
           )}
         </div>
 
-        <div className="flex items-center gap-3 text-base text-muted-foreground pt-2">
+        <div className="flex flex-wrap items-center gap-2 text-xs sm:text-sm text-muted-foreground pt-1">
           <span className="font-medium text-foreground">
             {feedbackData.profile?.full_name || "Anonymous"}
           </span>
@@ -133,7 +134,7 @@ const FeedbackDetailsHelper = async ({
           <span>
             {new Date(feedbackData.created_at).toLocaleDateString(undefined, {
               year: "numeric",
-              month: "long",
+              month: "short",
               day: "numeric",
             })}
           </span>
@@ -142,41 +143,42 @@ const FeedbackDetailsHelper = async ({
 
       {/* Description Content */}
       <Card className="w-full border-muted/60 shadow-sm bg-card/50">
-        <CardContent className="p-6 md:p-10 pb-4 md:pb-6">
-          <p className="whitespace-pre-wrap leading-loose text-lg text-foreground/90">
+        <CardContent className="p-4 sm:p-6 md:p-8">
+          <p className="whitespace-pre-wrap leading-relaxed text-sm sm:text-base md:text-lg text-foreground/90 break-words">
             {feedbackData.description}
           </p>
         </CardContent>
       </Card>
 
-      <div className="w-full flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 md:p-6 bg-primary/5 rounded-xl border border-primary/10">
+      {/* Upvote Banner */}
+      <div className="w-full flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 sm:p-5 md:p-6 bg-primary/5 rounded-xl border border-primary/10">
         <div className="space-y-1">
-          <h3 className="font-semibold text-foreground">
+          <h3 className="font-semibold text-sm sm:text-base text-foreground">
             Do you agree with this feedback?
           </h3>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-xs sm:text-sm text-muted-foreground">
             Upvote to help this idea get prioritized by the team!
           </p>
         </div>
-        <div className="shrink-0">
+        <div className="shrink-0 self-start sm:self-auto">
           <Upvote feedbackData={feedbackData} isVoted={isVoted} />
         </div>
       </div>
 
       {isAdmin && (
-        <div className="w-full flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 md:p-6 bg-secondary/30 rounded-xl border border-border border-dashed shadow-sm">
+        <div className="w-full flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 sm:p-5 md:p-6 bg-secondary/30 rounded-xl border border-border border-dashed shadow-sm">
           <div className="space-y-1">
-            <h3 className="font-semibold text-foreground flex items-center gap-2">
-              <span className="bg-primary/10 text-primary px-2 py-0.5 rounded text-xs tracking-wider font-bold uppercase">
+            <h3 className="font-semibold text-sm sm:text-base text-foreground flex items-center gap-2">
+              <span className="bg-primary/10 text-primary px-2 py-0.5 rounded text-[10px] sm:text-xs tracking-wider font-bold uppercase">
                 Admin
               </span>
               Update Status
             </h3>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-xs sm:text-sm text-muted-foreground">
               Change the progress status of this feedback.
             </p>
           </div>
-          <div className="shrink-0">
+          <div className="w-full sm:w-auto shrink-0">
             <StatusUpdateButton
               feedback_id={feedbackData.id}
               currentState={feedbackData.status}
@@ -185,16 +187,22 @@ const FeedbackDetailsHelper = async ({
         </div>
       )}
 
-      <Separator className="my-10" />
+      <Separator className="my-6 sm:my-8 md:my-10" />
 
       {/* Comments Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 w-full">
-        <div className="lg:col-span-2 space-y-6">
-          <h2 className="text-2xl font-bold tracking-tight flex items-center gap-3">
+      <div className="flex flex-col lg:grid lg:grid-cols-3 gap-6 sm:gap-8 lg:gap-10 w-full">
+        {/* On mobile, comment form comes first so user can write quickly without scrolling past all comments */}
+        <div className="order-first lg:order-last lg:col-span-1">
+          <CommentForm feedback_id={feedbackData.id} />
+        </div>
+
+        {/* Comments List */}
+        <div className="order-last lg:order-first lg:col-span-2 space-y-4 sm:space-y-6">
+          <h2 className="text-xl sm:text-2xl font-bold tracking-tight flex items-center gap-2.5 sm:gap-3">
             Comments
             <Badge
               variant="secondary"
-              className=" bg-primary/20 rounded-full px-3 py-0.5 text-sm font-medium"
+              className="bg-primary/20 rounded-full px-2.5 py-0.5 text-xs sm:text-sm font-medium"
             >
               {feedbackData.comment_count ??
                 (feedbackData?.comment as [{ count: number }])?.[0]?.count ??
@@ -202,11 +210,6 @@ const FeedbackDetailsHelper = async ({
             </Badge>
           </h2>
           <CommentList feedbackId={feedbackData.id} />
-        </div>
-
-        {/* Right Side: Add Comment Form UI */}
-        <div className="lg:col-span-1">
-          <CommentForm feedback_id={feedbackData.id} />
         </div>
       </div>
     </div>
@@ -220,9 +223,9 @@ const FeedbackDetailsPage = async ({
   params: Promise<{ id: string }>;
 }) => {
   return (
-    <div className="min-h-screen max-w-4xl mx-auto w-full px-4 py-8 md:py-12 flex flex-col items-start">
+    <div className="min-h-screen max-w-4xl mx-auto w-full px-4 py-6 sm:py-8 md:py-12 flex flex-col items-start">
       <Suspense
-        fallback={<p className="text-muted-foreground">Loading details...</p>}
+        fallback={<p className="text-muted-foreground text-sm sm:text-base">Loading details...</p>}
       >
         <FeedbackDetailsHelper idPromise={params} />
       </Suspense>

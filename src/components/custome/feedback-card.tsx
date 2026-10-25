@@ -72,36 +72,43 @@ export async function FeedbackCard({
     >
       <Link href={`/feedback/${feedbackData.id}`} className="block group">
         <CardHeader
-          className={`${isCompact ? "p-4 pb-3" : "pb-3"} group-hover:opacity-80 transition-opacity`}
+          className={`${isCompact ? "p-3.5 pb-2 sm:p-4 sm:pb-3" : "p-4 sm:p-6 pb-2 sm:pb-3"} group-hover:opacity-80 transition-opacity`}
         >
-          <div className="flex justify-between items-start gap-3">
-            <div className="space-y-1">
+          <div className="flex justify-between items-start gap-2 sm:gap-3">
+            <div className="space-y-1 min-w-0 flex-1">
               <CardTitle
                 className={
-                  isCompact ? "text-sm font-semibold leading-snug" : "text-xl"
+                  isCompact
+                    ? "text-sm font-semibold leading-snug break-words"
+                    : "text-base sm:text-lg md:text-xl font-bold leading-snug break-words"
                 }
               >
                 {feedbackData.title}
               </CardTitle>
               <CardDescription
                 className={
-                  isCompact ? "line-clamp-2 text-xs opacity-80" : "line-clamp-2"
+                  isCompact
+                    ? "line-clamp-2 text-xs opacity-80 break-words"
+                    : "line-clamp-2 text-xs sm:text-sm break-words"
                 }
               >
                 {feedbackData.description}
               </CardDescription>
             </div>
             {!isCompact && (
-              <Badge variant="outline" className={styles.badge}>
+              <Badge
+                variant="outline"
+                className={`${styles.badge} shrink-0 text-[11px] sm:text-xs px-2 py-0.5 sm:px-2.5 sm:py-1`}
+              >
                 {feedbackData.category}
               </Badge>
             )}
           </div>
         </CardHeader>
         {!isCompact && (
-          <CardContent className="pb-3 group-hover:opacity-80 transition-opacity">
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <div className="h-6 w-6 shrink-0 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xs uppercase overflow-hidden border relative">
+          <CardContent className="px-4 sm:px-6 pb-3 group-hover:opacity-80 transition-opacity">
+            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-muted-foreground">
+              <div className="h-5 w-5 sm:h-6 sm:w-6 shrink-0 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-[10px] sm:text-xs uppercase overflow-hidden border relative">
                 <UserAvatar
                   url={feedbackData.profile?.avatar_url}
                   fallbackText={
@@ -109,22 +116,24 @@ export async function FeedbackCard({
                   }
                 />
               </div>
-              <span className="font-medium text-foreground/80">
+              <span className="font-medium text-foreground/80 truncate max-w-[120px] sm:max-w-none">
                 {feedbackData.profile?.full_name || "Anonymous"}
               </span>
               <span>•</span>
-              <span>{new Date(feedbackData.created_at).toDateString()}</span>
+              <span className="text-[11px] sm:text-xs">
+                {new Date(feedbackData.created_at).toDateString()}
+              </span>
             </div>
           </CardContent>
         )}
       </Link>
-      <CardFooter className={isCompact ? "p-4 pt-0" : ""}>
+      <CardFooter className={isCompact ? "p-3.5 pt-0 sm:p-4 sm:pt-0" : "px-4 sm:px-6 pb-4 sm:pb-5 pt-0"}>
         <div
-          className={`flex items-center w-full ${isCompact ? "justify-between" : "gap-4"}`}
+          className={`flex items-center w-full ${isCompact ? "justify-between" : "gap-3 sm:gap-4"}`}
         >
           <Upvote feedbackData={feedbackData} isVoted={isVoted} />
 
-          <div className="flex items-center gap-3 text-sm text-muted-foreground">
+          <div className="flex items-center gap-2 sm:gap-3 text-xs sm:text-sm text-muted-foreground">
             {isCompact && (
               <div className="h-5 w-5 shrink-0 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-[10px] uppercase overflow-hidden border relative">
                 <UserAvatar
@@ -135,8 +144,8 @@ export async function FeedbackCard({
                 />
               </div>
             )}
-            <div className="flex items-center gap-1.5">
-              <MessageSquare className="w-4 h-4" suppressHydrationWarning />
+            <div className="flex items-center gap-1 sm:gap-1.5">
+              <MessageSquare className="w-3.5 h-3.5 sm:w-4 sm:h-4" suppressHydrationWarning />
               <span>
                 {feedbackData.comment_count ??
                   (feedbackData.comment as [{ count: number }])?.[0]?.count ??

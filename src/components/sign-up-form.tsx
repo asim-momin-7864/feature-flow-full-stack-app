@@ -22,15 +22,15 @@ export function SignUpForm({
   const [state, formAction, isPending] = useActionState(signupAction, null);
 
   return (
-    <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-2xl">Sign up</CardTitle>
-          <CardDescription>Create a new account</CardDescription>
+    <div className={cn("flex flex-col gap-4 sm:gap-6", className)} {...props}>
+      <Card className="shadow-sm">
+        <CardHeader className="p-4 sm:p-6 pb-2 sm:pb-3">
+          <CardTitle className="text-xl sm:text-2xl font-bold">Sign up</CardTitle>
+          <CardDescription className="text-xs sm:text-sm">Create a new account</CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-4 sm:p-6 pt-2 sm:pt-4">
           <form action={formAction}>
-            <div className="flex flex-col gap-6">
+            <div className="flex flex-col gap-4 sm:gap-5">
               <div className="grid gap-2">
                 <Label htmlFor="full-name">Full Name</Label>
                 <Input

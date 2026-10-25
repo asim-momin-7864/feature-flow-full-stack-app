@@ -23,32 +23,32 @@ export function LoginForm({
   const [state, formAction, isPending] = useActionState(loginAction, null);
 
   return (
-    <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-2xl">Login</CardTitle>
-          <CardDescription>
+    <div className={cn("flex flex-col gap-4 sm:gap-6", className)} {...props}>
+      <Card className="shadow-sm">
+        <CardHeader className="p-4 sm:p-6 pb-2 sm:pb-3">
+          <CardTitle className="text-xl sm:text-2xl font-bold">Login</CardTitle>
+          <CardDescription className="text-xs sm:text-sm">
             Enter your email below to login to your account
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-4 sm:p-6 pt-2 sm:pt-4">
           {/* Google Button */}
           <GoogleSignInButton />
 
           {/* Divider */}
-          <div className="relative my-6">
+          <div className="relative my-4 sm:my-6">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-300"></div>
+              <div className="w-full border-t border-border"></div>
             </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-white text-gray-500">
+            <div className="relative flex justify-center text-xs sm:text-sm">
+              <span className="px-2 bg-card text-muted-foreground">
                 Or continue with
               </span>
             </div>
           </div>
 
           <form action={formAction}>
-            <div className="flex flex-col gap-6">
+            <div className="flex flex-col gap-4 sm:gap-6">
               <div className="grid gap-2">
                 <Label htmlFor="email">Email</Label>
                 <Input
