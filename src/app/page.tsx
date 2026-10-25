@@ -6,7 +6,6 @@ import { Suspense } from "react";
 import { UserAvatar } from "@/components/custome/user-avatar";
 import { ArrowUp, TrendingUp } from "lucide-react";
 import Link from "next/link";
-import { log } from "console";
 
 async function FeedbackList() {
   const supabase = await createClient();
@@ -73,9 +72,10 @@ async function TrendingSidebar() {
 
   if (error) {
     console.error("TrendingSidebar error:", error.message);
+    return null;
   }
 
-  if (!data || error || data.length === 0) return null;
+  if (!data || data.length === 0) return null;
 
   return (
     <div className="w-full flex flex-col gap-4">
@@ -110,7 +110,7 @@ async function TrendingSidebar() {
 
               <div className="flex items-center gap-1 text-xs font-semibold text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
                 <ArrowUp className="w-3 h-3 text-emerald-500" />
-                <span>{feedback.vote_count ?? feedback.upvote_count ?? 0}</span>
+                <span>{feedback.vote_count ?? 0}</span>
               </div>
             </div>
           </Link>
