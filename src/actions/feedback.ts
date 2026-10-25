@@ -8,6 +8,7 @@ import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import ensureProfile from "@/lib/ensure-profile";
+import { getCurrentUser } from "@/lib/get-current-user";
 
 // Action State - what all server actions return to form
 export type ActionState = {
@@ -27,13 +28,12 @@ export async function createFeedbackAction(
   formData: FormData,
 ): Promise<ActionState> {
   // check user is authenticated
-  const supabase = await createClient();
-  const { data: authData, error: authError } = await supabase.auth.getUser();
+  const { userData, errorMessage } = await getCurrentUser();
 
-  if (authError || !authData.user) {
+  if (!userData || errorMessage) {
     return {
       success: false,
-      message: authError?.message || "User not authenticated",
+      message: errorMessage || "User not authenticated",
     };
   }
 
@@ -49,10 +49,12 @@ export async function createFeedbackAction(
     };
   }
 
+  const supabase = await createClient();
+
   // insert
   const { error } = await supabase.from("feedback").insert({
     ...validatedData.data,
-    user_id: authData.user.id, // needed for RLS
+    user_id: userData.id, // needed for RLS
   });
 
   // check
@@ -79,27 +81,18 @@ export async function deleteFeedbackAction(
   formData: FormData,
 ) {
   // check user is authenticated
-  const supabase = await createClient();
-  // logged-in
-  const { data: authData, error: authError } = await supabase.auth.getUser();
+  const { isAdmin, userData, errorMessage } = await getCurrentUser();
 
-  if (authError || !authData.user) {
+  if (!userData || errorMessage) {
     return {
       success: false,
-      message: authError?.message || "User not authenticated",
+      message: errorMessage || "User not authenticated",
     };
   }
 
   const feedbackId = String(formData.get("id"));
 
-  // Check if the user is an admin
-  const { data: profile } = await supabase
-    .from("profile")
-    .select("role")
-    .eq("id", authData.user.id)
-    .single();
-
-  const isAdmin = profile?.role === "ADMIN";
+  const supabase = await createClient();
 
   // delete (soft delete)
   const { error } = await supabase
@@ -137,10 +130,10 @@ export const toggleVoteAction = async (
   formData: FormData,
 ): Promise<VoteActionState> => {
   // check auth
-  const supabase = await createClient();
-  const { data: authData, error: authError } = await supabase.auth.getUser();
 
-  if (authError || !authData.user) {
+  const { userData, errorMessage } = await getCurrentUser();
+
+  if (!userData || errorMessage) {
     redirect("/auth/login");
   }
 
@@ -149,11 +142,13 @@ export const toggleVoteAction = async (
 
   const feedbackId = String(formData.get("feedback_id"));
 
+  const supabase = await createClient();
+
   // Check database directly to see if user has already voted
   const { data: existingVote, error: fetchVoteError } = await supabase
     .from("vote")
     .select("id")
-    .eq("user_id", authData.user.id)
+    .eq("user_id", userData.id)
     .eq("feedback_id", feedbackId)
     .maybeSingle();
 
@@ -176,7 +171,7 @@ export const toggleVoteAction = async (
     // upvote
     const { error } = await supabase.from("vote").insert({
       feedback_id: feedbackId,
-      user_id: authData.user.id,
+      user_id: userData.id,
     });
 
     if (error) {

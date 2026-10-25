@@ -5,27 +5,14 @@ import { Suspense } from "react";
 
 import DeleteCommentButton from "@/components/custome/delete-comment-button";
 import { UserAvatar } from "@/components/custome/user-avatar";
+import { getCurrentUser } from "@/lib/get-current-user";
 
 // helper func
 const CommentListFetch = async ({ feedbackId }: { feedbackId: string }) => {
-  const supabase = await createClient();
-
   // Get current user and role to conditionally show the delete button
-  const { data: authData } = await supabase.auth.getUser();
-  const currentUserId = authData.user?.id;
+  const { isAdmin, userData } = await getCurrentUser();
 
-  let isAdmin = false;
-
-  // basic check even authenticated or not, if not then no need to run query
-  if (currentUserId) {
-    const { data: profile } = await supabase
-      .from("profile")
-      .select("role")
-      .eq("id", currentUserId)
-      .single();
-    isAdmin = profile?.role === "ADMIN";
-  }
-
+  const supabase = await createClient();
   const { data, error } = await supabase
     .from("comment")
     .select("*, profile(full_name, avatar_url)")
@@ -45,7 +32,7 @@ const CommentListFetch = async ({ feedbackId }: { feedbackId: string }) => {
   return (
     <div className="space-y-3 sm:space-y-4">
       {commentsArray.map((comment) => {
-        const isOwner = currentUserId === comment.user_id;
+        const isOwner = userData?.id === comment.user_id;
 
         return (
           <div

@@ -2,8 +2,9 @@
 "use server";
 
 import { z } from "zod";
-import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
+import { getCurrentUser } from "@/lib/get-current-user";
+import { createClient } from "@/lib/supabase/server";
 
 // input schema type
 const CommentSchema = z.object({
@@ -24,15 +25,12 @@ export const createCommentAction = async (
   prevState: ActionState,
   formData: FormData,
 ): Promise<ActionState> => {
-  const supabase = await createClient();
+  const { userData, errorMessage } = await getCurrentUser();
 
-  // Check user is logged in
-  const { data: authData, error: authError } = await supabase.auth.getUser();
-
-  if (authError || !authData.user) {
+  if (!userData || errorMessage) {
     return {
       success: false,
-      message: authError?.message || "User not authenticated",
+      message: errorMessage || "User not authenticated",
     };
   }
 
@@ -53,10 +51,13 @@ export const createCommentAction = async (
   const { content } = validatedData.data;
   const feedbackId = String(formData.get("feedback_id"));
 
+  // insatnce
+  const supabase = await createClient();
+
   // insert
   const { error } = await supabase.from("comment").insert({
     content,
-    user_id: authData.user.id,
+    user_id: userData.id,
     feedback_id: feedbackId,
   });
 
@@ -83,29 +84,20 @@ export const deleteCommentAction = async (
   formData: FormData,
 ): Promise<ActionState> => {
   // check user
-  const supabase = await createClient();
 
-  // user logged
-  const { data: authData, error: authError } = await supabase.auth.getUser();
+  const { isAdmin, userData, errorMessage } = await getCurrentUser();
 
-  if (authError || !authData.user) {
+  if (!userData || errorMessage) {
     return {
       success: false,
-      message: authError?.message || "User not authenticated",
+      message: errorMessage || "User not authenticated",
     };
   }
 
   const commentId = String(formData.get("comment_id"));
   const feedbackId = String(formData.get("feedback_id"));
 
-  // Check if the user is an admin
-  const { data: profile } = await supabase
-    .from("profile")
-    .select("role")
-    .eq("id", authData.user.id)
-    .single();
-
-  const isAdmin = profile?.role === "ADMIN";
+  const supabase = await createClient();
 
   // delete (soft delete)
   const { error } = await supabase

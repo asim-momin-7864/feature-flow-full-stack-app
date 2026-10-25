@@ -2,26 +2,14 @@ import Link from "next/link";
 import { buttonVariants } from "./ui/button";
 import { createClient } from "@/lib/supabase/server";
 import { LogoutButton } from "./logout-button";
+import { getCurrentUser } from "@/lib/get-current-user";
 
 import { UserAvatar } from "@/components/custome/user-avatar";
 
 export async function AuthButton() {
-  const supabase = await createClient();
+  const { isAdmin, userData, profile, errorMessage } = await getCurrentUser();
 
-  const { data: authData } = await supabase.auth.getUser();
-  const user = authData?.user;
-
-  let profile = null;
-  if (user) {
-    const { data } = await supabase
-      .from("profile")
-      .select("full_name, avatar_url")
-      .eq("id", user.id)
-      .single();
-    profile = data;
-  }
-
-  return user ? (
+  return userData ? (
     <div className="flex items-center gap-2 sm:gap-3">
       <Link
         href="/feedback/new"
@@ -33,23 +21,39 @@ export async function AuthButton() {
       </Link>
       <div className="flex items-center gap-1.5 sm:gap-2">
         <div className="h-7 w-7 sm:h-8 sm:w-8 shrink-0 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xs uppercase overflow-hidden border relative">
-          <UserAvatar 
-            url={profile?.avatar_url} 
-            fallbackText={profile?.full_name?.charAt(0) || user.email?.charAt(0) || "U"} 
+          <UserAvatar
+            url={profile?.avatar_url}
+            fallbackText={
+              profile?.full_name?.charAt(0) || userData.email?.charAt(0) || "U"
+            }
           />
         </div>
         <span className="text-xs sm:text-sm font-medium hidden sm:inline-block max-w-[120px] truncate">
-          {profile?.full_name || user.email}
+          {profile?.full_name || userData.email}
         </span>
       </div>
       <LogoutButton />
     </div>
   ) : (
     <div className="flex items-center gap-1.5 sm:gap-2">
-      <Link href="/auth/login" className={buttonVariants({ size: "sm", variant: "outline", className: "text-xs sm:text-sm px-2.5 sm:px-3" })}>
+      <Link
+        href="/auth/login"
+        className={buttonVariants({
+          size: "sm",
+          variant: "outline",
+          className: "text-xs sm:text-sm px-2.5 sm:px-3",
+        })}
+      >
         Sign in
       </Link>
-      <Link href="/auth/sign-up" className={buttonVariants({ size: "sm", variant: "default", className: "text-xs sm:text-sm px-2.5 sm:px-3" })}>
+      <Link
+        href="/auth/sign-up"
+        className={buttonVariants({
+          size: "sm",
+          variant: "default",
+          className: "text-xs sm:text-sm px-2.5 sm:px-3",
+        })}
+      >
         Sign up
       </Link>
     </div>

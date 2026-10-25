@@ -15,6 +15,7 @@ import { hasUserVoted } from "@/lib/queries";
 import StatusUpdateButton from "@/components/custome/status-update-button";
 import Link from "next/link";
 import { CornerUpLeft } from "lucide-react";
+import { getCurrentUser } from "@/lib/get-current-user";
 
 // helper component
 const FeedbackDetailsHelper = async ({
@@ -45,21 +46,13 @@ const FeedbackDetailsHelper = async ({
   // type casting
   const feedbackData = data as unknown as FeedbackType;
 
-  // get current user to check ownership and role
-  const { data: authData } = await supabase.auth.getUser();
-  const isOwner = authData.user?.id === feedbackData.user_id;
-  let isAdmin = false;
-  if (authData.user) {
-    const { data: profile } = await supabase
-      .from("profile")
-      .select("role")
-      .eq("id", authData.user.id)
-      .single();
-    isAdmin = profile?.role === "ADMIN";
-  }
+  // check user auth and owner
+  const { isAdmin, userData } = await getCurrentUser();
 
-  const isVoted = authData.user
-    ? await hasUserVoted(feedbackData.id, authData.user.id)
+  const isOwner = userData ? userData.id === feedbackData.user_id : false;
+
+  const isVoted = userData
+    ? await hasUserVoted(feedbackData.id, userData.id)
     : false;
 
   const styles = getCategoryStyles(feedbackData.category);
@@ -93,7 +86,10 @@ const FeedbackDetailsHelper = async ({
           href="/"
           className="group inline-flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-medium text-muted-foreground hover:text-foreground transition-colors -ml-2 p-2 rounded-md hover:bg-muted/50"
         >
-          <CornerUpLeft size={16} className="transition-transform group-hover:-translate-x-0.5 group-hover:-translate-y-0.5" />
+          <CornerUpLeft
+            size={16}
+            className="transition-transform group-hover:-translate-x-0.5 group-hover:-translate-y-0.5"
+          />
           Go back
         </Link>
       </div>
@@ -225,7 +221,11 @@ const FeedbackDetailsPage = async ({
   return (
     <div className="min-h-screen max-w-4xl mx-auto w-full px-4 py-6 sm:py-8 md:py-12 flex flex-col items-start">
       <Suspense
-        fallback={<p className="text-muted-foreground text-sm sm:text-base">Loading details...</p>}
+        fallback={
+          <p className="text-muted-foreground text-sm sm:text-base">
+            Loading details...
+          </p>
+        }
       >
         <FeedbackDetailsHelper idPromise={params} />
       </Suspense>
