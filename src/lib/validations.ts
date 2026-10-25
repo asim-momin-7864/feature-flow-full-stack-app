@@ -59,6 +59,7 @@ export type FeedbackType = z.infer<typeof CreateFeedbackSchema> & {
     avatar_url: string;
   };
   // view columns (flat aggregates from vw_feedback_details)
+  vote_count?: number;
   upvote_count?: number;
   comment_count?: number;
   // legacy relational shapes (kept for compatibility)
@@ -70,7 +71,7 @@ export type FeedbackType = z.infer<typeof CreateFeedbackSchema> & {
 export type TrendingFeedbackType = {
   id: string;
   title: string;
-  upvote_count: number;
+  upvote_count?: number;
   is_deleted: boolean;
   deleted_at: Date | null;
   profile: {

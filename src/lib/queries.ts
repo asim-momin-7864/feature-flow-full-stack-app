@@ -11,7 +11,7 @@ export const hasUserVoted = async (
   const supabase = await createClient();
 
   const { data, error } = await supabase
-    .from("votes")
+    .from("vote")
     .select("id")
     .eq("user_id", userId)
     .eq("feedback_id", feedbackId)
