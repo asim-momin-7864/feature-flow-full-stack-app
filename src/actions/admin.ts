@@ -2,6 +2,7 @@
 
 "use server";
 
+import { requireAdmin } from "@/lib/require-admin";
 import { createClient } from "@/lib/supabase/server";
 // enum type
 import { type statusEnumType } from "@/lib/validations";
@@ -19,34 +20,14 @@ export const updateStatusAdminAction = async (
   prevState: ActionState,
   formData: FormData,
 ): Promise<ActionState> => {
-  // check user loggedin
-  const supabase = await createClient();
-  const { data: authData, error: authError } = await supabase.auth.getUser();
-
-  if (authError || !authData.user) {
-    return {
-      success: false,
-      error: authError?.message || "User not authenticated",
-    };
-  }
-
-  // check if user is admin
-  const { data: profile, error: profileError } = await supabase
-    .from("profile")
-    .select("role")
-    .eq("id", authData.user.id)
-    .single();
-
-  if (profileError || !profile || profile.role !== "ADMIN") {
-    return {
-      success: false,
-      error: "You are not authorized to perform this action",
-    };
-  }
+  // check admin first
+  await requireAdmin();
 
   // data from form
   const feedbackId = formData.get("feedback_id") as string;
   const updatedStatus = formData.get("status") as statusEnumType;
+
+  const supabase = await createClient();
 
   // update the status in database
   const { error: updateError } = await supabase
