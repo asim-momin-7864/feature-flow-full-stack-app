@@ -5,6 +5,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
+import ensureProfile from "@/lib/ensure-profile";
 
 // google oauth
 export async function signInWithGoogle() {
@@ -59,6 +60,9 @@ export async function loginAction(
     return { success: false, message: error.message };
   }
 
+  // ensure profile exists
+  await ensureProfile();
+
   redirect("/");
 }
 
@@ -80,7 +84,7 @@ export async function signupAction(
   const supabase = await createClient();
   const origin = (await headers()).get("origin") ?? "http://localhost:3000";
 
-  const { error } = await supabase.auth.signUp({
+  const { data: signUpData, error } = await supabase.auth.signUp({
     email,
     password,
     options: {
@@ -94,6 +98,15 @@ export async function signupAction(
 
   if (error) {
     return { success: false, message: error.message };
+  }
+
+  // If email confirmation is OFF, supabase auto-confirms the user and
+  // returns a session immediately. In that case we create the profile now
+  // because /auth/callback will NOT be visited.
+  // If email confirmation is ON, the session is null here — profile will
+  // be created later when the user clicks the email link → /auth/confirm.
+  if (signUpData.session) {
+    await ensureProfile();
   }
 
   redirect("/auth/sign-up-success");
