@@ -53,7 +53,7 @@ const ensureProfile = async (): Promise<EnsureProfileResult> => {
         user?.user_metadata.full_name || user?.user_metadata.name || "No name",
       avatar_url:
         user?.user_metadata.avatar_url ||
-        "https://imgs.search.brave.com/ajOI_7oCfnAzS075ZSCxdW3HII4j5cleOSYz3QYXXdM/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9pLnBp/bmltZy5jb20vb3Jp/Z2luYWxzLzBmLzY5/LzFjLzBmNjkxY2Q3/N2E4YzZkOTBmMDdi/MzVjMTBjOTU2Njhm/LmpwZw",
+        "https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=original",
     });
 
   // check
