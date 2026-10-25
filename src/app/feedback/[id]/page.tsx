@@ -16,6 +16,7 @@ import StatusUpdateButton from "@/components/custome/status-update-button";
 import Link from "next/link";
 import { CornerUpLeft } from "lucide-react";
 import { getCurrentUser } from "@/lib/get-current-user";
+import { notFound } from "next/navigation";
 
 // helper component
 const FeedbackDetailsHelper = async ({
@@ -32,15 +33,19 @@ const FeedbackDetailsHelper = async ({
     .from("vw_feedback_details")
     .select("*")
     .eq("id", id)
-    .single();
+    .maybeSingle();
 
   // error
-  if (error || !data) {
+  if (error) {
     return (
       <p className="text-center text-destructive py-10">
         {error?.message || "Some error in fetching"}
       </p>
     );
+  }
+
+  if (!data) {
+    return notFound();
   }
 
   // type casting

@@ -1,6 +1,6 @@
 // src/lib/require-admin.ts
 import { getCurrentUser } from "./get-current-user";
-import { redirect } from "next/navigation";
+import { forbidden, redirect } from "next/navigation";
 
 export async function requireAdmin() {
   const { userData, profile, isAdmin } = await getCurrentUser();
@@ -12,7 +12,7 @@ export async function requireAdmin() {
 
   // not admin - unauthorized
   if (!isAdmin) {
-    redirect("/forbidden");
+    return forbidden();
   }
 
   return { userData, profile, isAdmin };
